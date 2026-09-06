@@ -260,9 +260,32 @@ input[type=range]{flex:1;accent-color:var(--ember);}
 .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
 
 @media (max-width:800px){
-  .sidebar{position:fixed;left:-280px;z-index:20;transition:left .2s;box-shadow:0 0 40px rgba(0,0,0,0.6);}
+  .sidebar{position:fixed;left:-280px;top:0;z-index:20;transition:left .2s;box-shadow:0 0 40px rgba(0,0,0,0.6);}
   .sidebar.open{left:0;}
-  .menu-toggle{display:block;}
-  .page-root{padding:20px;}
-  .hero h1{font-size:34px;}
+  .menu-toggle{display:block;min-width:44px;min-height:44px;font-size:18px;}
+  .page-root{padding:16px;}
+  .hero{padding:36px 22px;}
+  .hero h1{font-size:30px;}
+  .hero .cta-row{flex-direction:column;}
+  .hero .cta-row .btn{width:100%;text-align:center;}
+ 
+  /* Prevent iOS/Android auto-zoom-on-focus, which throws off every
+     tap that follows — the #1 cause of a page "going unresponsive"
+     right after typing in a field. Browsers only avoid the zoom
+     when the focused input's font-size is >= 16px. */
+  .inputs-row input, .inputs-row select,
+  .speed-select, input[type=range]{font-size:16px;}
+  .inputs-row input, .inputs-row select{padding:10px;}
+ 
+  /* Bigger, easier touch targets */
+  .ctrl-btn{width:44px;height:44px;font-size:16px;}
+  .topic-item, .module-head{padding-top:12px;padding-bottom:12px;}
+  .btn{padding:14px 20px;}
+ 
+  /* Canvas areas scroll cleanly on touch instead of fighting the
+     page scroll or clipping content off-screen */
+  .canvas-wrap, .grid-scroll{-webkit-overflow-scrolling:touch;}
+ 
+  .lab-grid{gap:12px;}
 }
+ 
