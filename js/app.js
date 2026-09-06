@@ -698,6 +698,11 @@ function togglePlay() {
     stopPlay();
     return;
   }
+  // If playback already ran to the end, pressing Play again should restart
+  // from the beginning automatically instead of doing nothing.
+  if (LAB_STATE.idx >= LAB_STATE.steps.length - 1) {
+    gotoStep(0);
+  }
   LAB_STATE.playing = true;
   document.getElementById("btn-play").textContent = "❚❚";
   LAB_STATE.timer = setInterval(() => {
