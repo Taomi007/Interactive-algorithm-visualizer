@@ -343,6 +343,24 @@ document.getElementById("menu-toggle").onclick = () => {
   document.getElementById("sidebar").classList.toggle("open");
 };
 
+// On mobile, the sidebar sits on top of the whole page. Without this,
+// tapping a link inside it navigates underneath while the menu stays
+// open and covers the screen — it looks like the site stopped responding.
+document.getElementById("sidebar").addEventListener("click", (e) => {
+  if (e.target.closest("a") && window.innerWidth <= 800) {
+    document.getElementById("sidebar").classList.remove("open");
+  }
+});
+
+// Tapping the main content area while the mobile menu is open closes it too
+// (but ignore the toggle button itself — it has its own open/close logic above).
+document.querySelector(".main-col").addEventListener("click", (e) => {
+  if (e.target.closest("#menu-toggle")) return;
+  if (window.innerWidth <= 800) {
+    document.getElementById("sidebar").classList.remove("open");
+  }
+});
+
 /* ---------------- TERMINAL FOOTER ---------------- */
 const terminalLines = [
   "SYSTEM READY // ALL MODULES INDEXED",
@@ -379,7 +397,7 @@ function renderHome() {
       <p>The Kinetic Logic Engine is an interactive systems-view of data structures & algorithms — every module of the syllabus, laid out, explained, and where possible, made to run in front of you, one state transition at a time.</p>
       <div class="cta-row">
         <a href="#/lab/bubble-sort" class="btn primary">ENTER THE LOGIC LAB →</a>
-        <a href="#/module/sorting" class="btn">BROWSE SYLLABUS</a>
+        <button id="btn-browse-syllabus" class="btn">BROWSE SYLLABUS</button>
       </div>
     </section>
 
@@ -391,6 +409,9 @@ function renderHome() {
       <p>Algorithms fail to be intuitive not because they're conceptually hard, but because textbook descriptions collapse dozens of state transitions into a single paragraph. The Logic Lab refuses to collapse anything: every comparison, swap, and pointer movement is its own discrete, scrubbable frame — paired with the exact pseudocode line and variable state that produced it.</p>
     </section>
   `;
+  document.getElementById("btn-browse-syllabus").onclick = () => {
+    document.getElementById("module-grid").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
   const grid = document.getElementById("module-grid");
   SYLLABUS.forEach((mod, mi) => {
     const card = document.createElement("a");
