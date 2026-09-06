@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KINETIC LOGIC ENGINE — DSA Visualizer</title>
+<meta name="description" content="An interactive data structures & algorithms visualizer. Step through search, sort, graph, greedy and DP algorithms with live state tracking." />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- ============ SIDEBAR : SYLLABUS MATRIX ============ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-mark">◆</span>
+        <div class="brand-text">
+          <div class="brand-title">KINETIC<br/>LOGIC<br/>ENGINE</div>
+          <div class="brand-sub">v1.0 // DSA SYSTEM</div>
+        </div>
+      </div>
+
+      <nav class="syllabus" id="syllabus-nav" aria-label="Syllabus Matrix">
+        <!-- injected by app.js -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="#/" class="home-link">&larr; HOME</a>
+      </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <div class="main-col">
+      <header class="topbar">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle syllabus">☰</button>
+        <div class="crumbs" id="crumbs">HOME</div>
+        <div class="topbar-status">
+          <span class="dot"></span> SYSTEM ONLINE
+        </div>
+      </header>
+
+      <main id="page-root" class="page-root">
+        <!-- injected by app.js router -->
+      </main>
+
+      <footer class="site-footer">
+        <div class="terminal-line">
+          <span class="prompt">&gt;</span>
+          <span id="terminal-text"></span><span class="cursor">_</span>
+        </div>
+      </footer>
+    </div>
+
+  </div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/code-snippets.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
