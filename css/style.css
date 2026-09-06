@@ -175,7 +175,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:0.01em;margin:0
 /* ---------- LOGIC LAB ---------- */
 .lab-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;}
 @media (max-width:1000px){.lab-grid{grid-template-columns:1fr;}}
-.lab-panel{border:1px solid var(--line);background:var(--obsidian-1);padding:18px;}
+.lab-panel{border:1px solid var(--line);background:var(--obsidian-1);padding:18px;min-width:0;}
 .lab-panel h4{font-size:11px;letter-spacing:0.1em;color:var(--ink-2);text-transform:uppercase;margin-bottom:14px;}
 
 .canvas-wrap{min-height:280px;display:flex;align-items:flex-end;justify-content:center;gap:4px;padding:20px 6px;border:1px dashed var(--line);background:var(--obsidian-0);overflow:auto;}
@@ -215,6 +215,7 @@ h1,h2,h3{font-family:var(--serif);font-weight:400;letter-spacing:0.01em;margin:0
 .pseudo .pl{padding:1px 6px;color:var(--ink-2);white-space:pre;}
 .pseudo .pl.active{color:var(--ember);background:rgba(255,90,31,0.08);}
 .pseudo pre{margin:0;white-space:pre;color:var(--ink-1);}
+.pseudo{max-width:100%;overflow-x:auto;}
 
 .label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:8px;}
 .lang-tabs{display:flex;gap:4px;flex-wrap:wrap;}
@@ -285,7 +286,8 @@ input[type=range]{flex:1;accent-color:var(--ember);}
   /* Canvas areas scroll cleanly on touch instead of fighting the
      page scroll or clipping content off-screen */
   .canvas-wrap, .grid-scroll{-webkit-overflow-scrolling:touch;}
- 
+ .lab-grid{gap:12px;}
+.pseudo pre{white-space:pre-wrap;word-break:break-word;}
   .lab-grid{gap:12px;}
 }
  
