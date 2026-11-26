@@ -690,6 +690,13 @@ function runVisualizer(visId) {
     (vis.inputs || []).forEach((spec) => {
       const el = document.getElementById(`in-${spec.key}`);
       const parsed = PARSERS[spec.kind](el.value);
+      const name = (spec.label || spec.key).split("(")[0].trim().toLowerCase();
+      // Input validation: bad fields become a friendly "Invalid input" frame
+      if (spec.kind === "int" && isNaN(parsed)) throw new Error(`the ${name} field must be a number`);
+      if (Array.isArray(parsed) && parsed.length === 0) throw new Error(`the ${name} field is empty or has no valid numbers`);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed) &&
+          Object.values(parsed).some((x) => Array.isArray(x) && x.length === 0))
+        throw new Error(`the ${name} field is empty or has no valid entries`);
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         Object.assign(values, parsed);
       } else {
