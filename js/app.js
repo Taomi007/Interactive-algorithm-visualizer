@@ -1,873 +1,1230 @@
 /* ==========================================================
-   KINETIC LOGIC ENGINE — APP SHELL
-   Hash-based router + page renderers + Logic Lab controller.
+   KINETIC LOGIC ENGINE — CODE SNIPPETS
+   Real, runnable reference implementations per language,
+   shown in the Logic Lab's language tabs next to pseudocode.
    ========================================================== */
 
-/* ---------------- SHARED DEFAULT GRAPHS ---------------- */
-const UNWEIGHTED_GRAPH = {
-  nodes: ["A", "B", "C", "D", "E", "F"],
-  edges: [
-    ["A", "B"], ["A", "C"], ["B", "D"], ["C", "D"],
-    ["D", "E"], ["E", "F"], ["C", "F"],
-  ],
-};
-const WEIGHTED_GRAPH = {
-  nodes: ["A", "B", "C", "D", "E", "F"],
-  edges: [
-    ["A", "B", 4], ["A", "C", 2], ["B", "C", 1], ["B", "D", 5],
-    ["C", "D", 8], ["C", "E", 10], ["D", "E", 2], ["D", "F", 6], ["E", "F", 3],
-  ],
-};
-const BELLMAN_FORD_GRAPH = {
-  nodes: ["A", "B", "C", "D", "E"],
-  directed: true,
-  edges: [
-    ["A", "B", 4], ["A", "C", 5], ["B", "C", -3], ["B", "D", 6],
-    ["C", "D", 4], ["D", "E", 2], ["C", "E", 7],
-  ],
-};
-const DAG_GRAPH = {
-  nodes: ["A", "B", "C", "D", "E", "F"],
-  directed: true,
-  edges: [
-    ["A", "B"], ["A", "C"], ["B", "D"], ["C", "D"],
-    ["D", "E"], ["C", "F"], ["F", "E"],
-  ],
-};
-const FLOW_GRAPH = {
-  nodes: ["S", "A", "B", "C", "T"],
-  directed: true,
-  edges: [
-    ["S", "A", 10], ["S", "B", 5], ["A", "B", 15], ["A", "C", 10],
-    ["B", "C", 4], ["B", "T", 10], ["C", "T", 10],
-  ],
-};
-
-/* ---------------- INPUT PARSERS ----------------
-   'intarray'/'int'/'text'/'node' return a single value stored under
-   the input's own key. 'pairs'/'items'/'freqs' return an object whose
-   keys get merged directly into the collected values (see runVisualizer).
-   ------------------------------------------------ */
-const PARSERS = {
-  intarray: (raw) => raw.split(",").map((s) => parseInt(s.trim(), 10)).filter((n) => !isNaN(n)),
-  int: (raw) => parseInt(raw, 10),
-  text: (raw) => raw.trim(),
-  node: (raw) => raw,
-  pairs: (raw) => {
-    const starts = [], finishes = [];
-    raw.split(",").forEach((pair) => {
-      const [s, f] = pair.split(":").map((x) => parseInt(x.trim(), 10));
-      if (!isNaN(s) && !isNaN(f)) { starts.push(s); finishes.push(f); }
-    });
-    return { starts, finishes };
-  },
-  items: (raw) => {
-    const values = [], weights = [];
-    raw.split(",").forEach((pair) => {
-      const [v, w] = pair.split(":").map((x) => parseInt(x.trim(), 10));
-      if (!isNaN(v) && !isNaN(w)) { values.push(v); weights.push(w); }
-    });
-    return { values, weights };
-  },
-  freqs: (raw) => {
-    const symbols = [], freqs = [];
-    raw.split(",").forEach((pair) => {
-      const parts = pair.split(":");
-      const sym = (parts[0] || "").trim();
-      const f = parseInt(parts[1], 10);
-      if (sym && !isNaN(f)) { symbols.push(sym); freqs.push(f); }
-    });
-    return { symbols, freqs };
-  },
-};
-
-/* ---------------- VISUALIZER REGISTRY ----------------
-   category: 'bars' | 'graph' | 'grid' — selects the renderer.
-   inputs: ordered field specs consumed by buildInputsPanel/runVisualizer.
-   run(values): values is a flat object of parsed input values.
-   -------------------------------------------------------- */
-const VISUALIZERS = {
-  /* ---------- SEARCH ---------- */
+const CODE_SNIPPETS = {
   "linear-search": {
-    label: "Linear Search", category: "bars",
-    complexity: { time: "O(n)", space: "O(1)" },
-    inputs: [
-      { key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [5, 3, 8, 1, 9, 2, 7], wide: true },
-      { key: "target", label: "TARGET", kind: "int", default: 1 },
-    ],
-    run: (v) => ENGINE["linear-search"](v.array, v.target),
+    c: `int linearSearch(int arr[], int n, int target) {
+    for (int i = 0; i < n; i++) {
+        if (arr[i] == target) {
+            return i;
+        }
+    }
+    return -1;
+}`,
+    cpp: `using namespace std;
+int linearSearch(vector<int>& arr, int target) {
+    for (int i = 0; i < (int)arr.size(); i++) {
+        if (arr[i] == target) {
+            return i;
+        }
+    }
+    return -1;
+}`,
+    python: `def linear_search(arr, target):
+    for i in range(len(arr)):
+        if arr[i] == target:
+            return i
+    return -1`,
   },
+
   "binary-search": {
-    label: "Binary Search", category: "bars",
-    complexity: { time: "O(log n)", space: "O(1)" },
-    inputs: [
-      { key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [1, 3, 4, 6, 8, 9, 11, 14, 18], wide: true },
-      { key: "target", label: "TARGET", kind: "int", default: 8 },
-    ],
-    run: (v) => ENGINE["binary-search"](v.array, v.target),
+    c: `int binarySearch(int arr[], int n, int target) {
+    int lo = 0, hi = n - 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (arr[mid] == target) return mid;
+        else if (arr[mid] < target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}`,
+    cpp: `using namespace std;
+int binarySearch(vector<int>& arr, int target) {
+    int lo = 0, hi = (int)arr.size() - 1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (arr[mid] == target) return mid;
+        else if (arr[mid] < target) lo = mid + 1;
+        else hi = mid - 1;
+    }
+    return -1;
+}`,
+    python: `def binary_search(arr, target):
+    lo, hi = 0, len(arr) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1`,
   },
 
-  /* ---------- SORTING ---------- */
   "bubble-sort": {
-    label: "Bubble Sort", category: "bars",
-    complexity: { time: "O(n²) avg/worst, O(n) best", space: "O(1)" },
-    inputs: [{ key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [6, 2, 9, 1, 5, 8, 3], wide: true }],
-    run: (v) => ENGINE["bubble-sort"](v.array),
+    c: `void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int swapped = 0;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int tmp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = tmp;
+                swapped = 1;
+            }
+        }
+        if (!swapped) break;
+    }
+}`,
+    cpp: `using namespace std;
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        if (!swapped) break;
+    }
+}`,
+    python: `def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n - 1):
+        swapped = False
+        for j in range(n - i - 1):
+            if arr[j] > arr[j + 1]:
+                arr[j], arr[j + 1] = arr[j + 1], arr[j]
+                swapped = True
+        if not swapped:
+            break
+    return arr`,
   },
+
   "insertion-sort": {
-    label: "Insertion Sort", category: "bars",
-    complexity: { time: "O(n²) avg/worst, O(n) best", space: "O(1)" },
-    inputs: [{ key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [7, 2, 8, 5, 1, 9, 4], wide: true }],
-    run: (v) => ENGINE["insertion-sort"](v.array),
+    c: `void insertionSort(int arr[], int n) {
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}`,
+    cpp: `using namespace std;
+void insertionSort(vector<int>& arr) {
+    for (int i = 1; i < (int)arr.size(); i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}`,
+    python: `def insertion_sort(arr):
+    for i in range(1, len(arr)):
+        key = arr[i]
+        j = i - 1
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    return arr`,
   },
+
   "selection-sort": {
-    label: "Selection Sort", category: "bars",
-    complexity: { time: "O(n²) in all cases", space: "O(1)" },
-    inputs: [{ key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [4, 9, 1, 7, 3, 8, 2], wide: true }],
-    run: (v) => ENGINE["selection-sort"](v.array),
+    c: `void selectionSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        int tmp = arr[i];
+        arr[i] = arr[minIdx];
+        arr[minIdx] = tmp;
+    }
+}`,
+    cpp: `using namespace std;
+void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n - 1; i++) {
+        int minIdx = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        swap(arr[i], arr[minIdx]);
+    }
+}`,
+    python: `def selection_sort(arr):
+    n = len(arr)
+    for i in range(n - 1):
+        min_idx = i
+        for j in range(i + 1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr`,
   },
+
   "merge-sort": {
-    label: "Merge Sort", category: "bars",
-    complexity: { time: "O(n log n)", space: "O(n)" },
-    inputs: [{ key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [8, 3, 6, 1, 9, 4, 2, 7], wide: true }],
-    run: (v) => ENGINE["merge-sort"](v.array),
-  },
-  "quick-sort": {
-    label: "Quick Sort", category: "bars",
-    complexity: { time: "O(n log n) avg, O(n²) worst", space: "O(log n) avg" },
-    inputs: [{ key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [8, 3, 6, 1, 9, 4, 2, 7], wide: true }],
-    run: (v) => ENGINE["quick-sort"](v.array),
-  },
-  "heap-sort": {
-    label: "Heap Sort", category: "bars",
-    complexity: { time: "O(n log n) in all cases", space: "O(1)" },
-    inputs: [{ key: "array", label: "ARRAY (comma-separated)", kind: "intarray", default: [4, 10, 3, 5, 1, 8, 9, 2], wide: true }],
-    run: (v) => ENGINE["heap-sort"](v.array),
-  },
-  "counting-sort": {
-    label: "Counting Sort", category: "bars",
-    complexity: { time: "O(n + k)", space: "O(n + k)" },
-    inputs: [{ key: "array", label: "ARRAY (non-negative ints)", kind: "intarray", default: [4, 2, 2, 8, 3, 3, 1, 0], wide: true }],
-    run: (v) => ENGINE["counting-sort"](v.array),
-  },
-  "radix-sort": {
-    label: "Radix Sort", category: "bars",
-    complexity: { time: "O(d · (n + k))", space: "O(n + k)" },
-    inputs: [{ key: "array", label: "ARRAY (non-negative ints)", kind: "intarray", default: [170, 45, 75, 90, 802, 24, 2, 66], wide: true }],
-    run: (v) => ENGINE["radix-sort"](v.array),
+    c: `void merge(int arr[], int lo, int mid, int hi) {
+    int n1 = mid - lo + 1, n2 = hi - mid;
+    int left[n1], right[n2];
+    for (int i = 0; i < n1; i++) left[i] = arr[lo + i];
+    for (int j = 0; j < n2; j++) right[j] = arr[mid + 1 + j];
+
+    int i = 0, j = 0, k = lo;
+    while (i < n1 && j < n2)
+        arr[k++] = (left[i] <= right[j]) ? left[i++] : right[j++];
+    while (i < n1) arr[k++] = left[i++];
+    while (j < n2) arr[k++] = right[j++];
+}
+
+void mergeSort(int arr[], int lo, int hi) {
+    if (lo >= hi) return;
+    int mid = lo + (hi - lo) / 2;
+    mergeSort(arr, lo, mid);
+    mergeSort(arr, mid + 1, hi);
+    merge(arr, lo, mid, hi);
+}`,
+    cpp: `using namespace std;
+void merge(vector<int>& arr, int lo, int mid, int hi) {
+    vector<int> left(arr.begin() + lo, arr.begin() + mid + 1);
+    vector<int> right(arr.begin() + mid + 1, arr.begin() + hi + 1);
+    int i = 0, j = 0, k = lo;
+    while (i < (int)left.size() && j < (int)right.size())
+        arr[k++] = (left[i] <= right[j]) ? left[i++] : right[j++];
+    while (i < (int)left.size()) arr[k++] = left[i++];
+    while (j < (int)right.size()) arr[k++] = right[j++];
+}
+
+void mergeSort(vector<int>& arr, int lo, int hi) {
+    if (lo >= hi) return;
+    int mid = lo + (hi - lo) / 2;
+    mergeSort(arr, lo, mid);
+    mergeSort(arr, mid + 1, hi);
+    merge(arr, lo, mid, hi);
+}`,
+    python: `def merge_sort(arr, lo=0, hi=None):
+    if hi is None:
+        hi = len(arr) - 1
+    if lo >= hi:
+        return arr
+    mid = (lo + hi) // 2
+    merge_sort(arr, lo, mid)
+    merge_sort(arr, mid + 1, hi)
+    merge(arr, lo, mid, hi)
+    return arr
+
+def merge(arr, lo, mid, hi):
+    left = arr[lo:mid + 1]
+    right = arr[mid + 1:hi + 1]
+    i = j = 0
+    k = lo
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            arr[k] = left[i]; i += 1
+        else:
+            arr[k] = right[j]; j += 1
+        k += 1
+    while i < len(left):
+        arr[k] = left[i]; i += 1; k += 1
+    while j < len(right):
+        arr[k] = right[j]; j += 1; k += 1`,
   },
 
-  /* ---------- GREEDY ---------- */
-  "activity-selection": {
-    label: "Activity Selection", category: "bars",
-    complexity: { time: "O(n log n)", space: "O(1) after sorting" },
-    inputs: [{ key: "activities", label: "ACTIVITIES (start:finish, comma-separated)", kind: "pairs", default: "1:4,3:5,0:6,5:7,3:9,5:9,6:10,8:11,8:12,2:14", wide: true }],
-    run: (v) => ENGINE["activity-selection"](v.starts, v.finishes),
-  },
-  "fractional-knapsack": {
-    label: "Fractional Knapsack", category: "bars",
-    complexity: { time: "O(n log n)", space: "O(1)" },
-    inputs: [
-      { key: "items", label: "ITEMS (value:weight, comma-separated)", kind: "items", default: "60:10,100:20,120:30", wide: true },
-      { key: "capacity", label: "CAPACITY", kind: "int", default: 50 },
-    ],
-    run: (v) => ENGINE["fractional-knapsack"](v.weights, v.values, v.capacity),
-  },
-  "huffman-coding": {
-    label: "Huffman Coding", category: "bars",
-    complexity: { time: "O(n log n)", space: "O(n)" },
-    inputs: [{ key: "freqs", label: "SYMBOL:FREQUENCY (comma-separated)", kind: "freqs", default: "A:5,B:9,C:12,D:13,E:16,F:45", wide: true }],
-    run: (v) => ENGINE["huffman-coding"](v.symbols, v.freqs),
-  },
-
-  /* ---------- DYNAMIC PROGRAMMING ---------- */
-  "fibonacci-dp": {
-    label: "Fibonacci (DP)", category: "bars",
-    complexity: { time: "O(n)", space: "O(n)" },
-    inputs: [{ key: "n", label: "N", kind: "int", default: 10 }],
-    run: (v) => ENGINE["fibonacci-dp"](v.n),
-  },
-  "rod-cutting": {
-    label: "Rod Cutting", category: "bars",
-    complexity: { time: "O(n²)", space: "O(n)" },
-    inputs: [{ key: "array", label: "PRICES (index = length 1..n)", kind: "intarray", default: [1, 5, 8, 9, 10, 17, 17, 20], wide: true }],
-    run: (v) => ENGINE["rod-cutting"](v.array),
-  },
-  "coin-change-dp": {
-    label: "Coin Change (DP)", category: "bars",
-    complexity: { time: "O(amount × coins)", space: "O(amount)" },
-    inputs: [
-      { key: "coins", label: "COINS (comma-separated)", kind: "intarray", default: [1, 3, 4] },
-      { key: "amount", label: "AMOUNT", kind: "int", default: 6 },
-    ],
-    run: (v) => ENGINE["coin-change-dp"](v.coins, v.amount),
-  },
-  "01-knapsack": {
-    label: "0/1 Knapsack", category: "grid",
-    complexity: { time: "O(n · W)", space: "O(n · W)" },
-    inputs: [
-      { key: "items", label: "ITEMS (value:weight, comma-separated)", kind: "items", default: "60:10,100:20,120:30", wide: true },
-      { key: "capacity", label: "CAPACITY", kind: "int", default: 30 },
-    ],
-    run: (v) => ENGINE["01-knapsack"](v.weights, v.values, v.capacity),
-  },
-  lcs: {
-    label: "Longest Common Subsequence", category: "grid",
-    complexity: { time: "O(m · n)", space: "O(m · n)" },
-    inputs: [
-      { key: "s1", label: "STRING A", kind: "text", default: "ABCBDAB" },
-      { key: "s2", label: "STRING B", kind: "text", default: "BDCABA" },
-    ],
-    run: (v) => ENGINE["lcs"](v.s1, v.s2),
-  },
-
-  /* ---------- GRAPH ---------- */
   bfs: {
-    label: "Breadth-First Search", category: "graph",
-    complexity: { time: "O(V + E)", space: "O(V)" },
-    defaultGraph: UNWEIGHTED_GRAPH,
-    inputs: [{ key: "start", label: "START NODE", kind: "node", default: "A" }],
-    run: (v) => ENGINE["bfs"](UNWEIGHTED_GRAPH, v.start),
+    c: `// adjacency list as arr of int lists; queue via simple array
+void bfs(int start, int** adj, int* adjSize, int n) {
+    int visited[n]; memset(visited, 0, sizeof(visited));
+    int queue[n], front = 0, back = 0;
+    queue[back++] = start; visited[start] = 1;
+    while (front < back) {
+        int u = queue[front++];
+        printf("visit %d\\n", u);
+        for (int k = 0; k < adjSize[u]; k++) {
+            int v = adj[u][k];
+            if (!visited[v]) {
+                visited[v] = 1;
+                queue[back++] = v;
+            }
+        }
+    }
+}`,
+    cpp: `using namespace std;
+void bfs(int start, vector<vector<int>>& adj) {
+    vector<bool> visited(adj.size(), false);
+    queue<int> q;
+    q.push(start); visited[start] = true;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        cout << "visit " << u << "\\n";
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+}`,
+    python: `from collections import deque
+
+def bfs(graph, start):
+    visited = {start}
+    queue = deque([start])
+    order = []
+    while queue:
+        u = queue.popleft()
+        order.append(u)
+        for v in sorted(graph[u]):
+            if v not in visited:
+                visited.add(v)
+                queue.append(v)
+    return order`,
   },
+
   dfs: {
-    label: "Depth-First Search", category: "graph",
-    complexity: { time: "O(V + E)", space: "O(V)" },
-    defaultGraph: UNWEIGHTED_GRAPH,
-    inputs: [{ key: "start", label: "START NODE", kind: "node", default: "A" }],
-    run: (v) => ENGINE["dfs"](UNWEIGHTED_GRAPH, v.start),
+    c: `void dfs(int start, int** adj, int* adjSize, int n) {
+    int visited[n]; memset(visited, 0, sizeof(visited));
+    int stack[n], top = 0;
+    stack[top++] = start;
+    while (top > 0) {
+        int u = stack[--top];
+        if (visited[u]) continue;
+        visited[u] = 1;
+        printf("visit %d\\n", u);
+        for (int k = adjSize[u] - 1; k >= 0; k--) {
+            int v = adj[u][k];
+            if (!visited[v]) stack[top++] = v;
+        }
+    }
+}`,
+    cpp: `using namespace std;
+void dfs(int start, vector<vector<int>>& adj) {
+    vector<bool> visited(adj.size(), false);
+    stack<int> s;
+    s.push(start);
+    while (!s.empty()) {
+        int u = s.top(); s.pop();
+        if (visited[u]) continue;
+        visited[u] = true;
+        cout << "visit " << u << "\\n";
+        for (auto it = adj[u].rbegin(); it != adj[u].rend(); ++it) {
+            if (!visited[*it]) s.push(*it);
+        }
+    }
+}`,
+    python: `def dfs(graph, start):
+    visited = set()
+    stack = [start]
+    order = []
+    while stack:
+        u = stack.pop()
+        if u in visited:
+            continue
+        visited.add(u)
+        order.append(u)
+        for v in sorted(graph[u], reverse=True):
+            if v not in visited:
+                stack.append(v)
+    return order`,
   },
-  "topo-sort": {
-    label: "Topological Sort", category: "graph",
-    complexity: { time: "O(V + E)", space: "O(V)" },
-    defaultGraph: DAG_GRAPH,
-    inputs: [],
-    run: () => ENGINE["topo-sort"](DAG_GRAPH),
+
+  "quick-sort": {
+    c: `int partition(int arr[], int lo, int hi) {
+    int pivot = arr[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++) {
+        if (arr[j] < pivot) {
+            i++;
+            int t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+        }
+    }
+    int t = arr[i+1]; arr[i+1] = arr[hi]; arr[hi] = t;
+    return i + 1;
+}
+void quickSort(int arr[], int lo, int hi) {
+    if (lo >= hi) return;
+    int p = partition(arr, lo, hi);
+    quickSort(arr, lo, p - 1);
+    quickSort(arr, p + 1, hi);
+}`,
+    cpp: `using namespace std;
+int partition(vector<int>& arr, int lo, int hi) {
+    int pivot = arr[hi], i = lo - 1;
+    for (int j = lo; j < hi; j++) {
+        if (arr[j] < pivot) swap(arr[++i], arr[j]);
+    }
+    swap(arr[i + 1], arr[hi]);
+    return i + 1;
+}
+void quickSort(vector<int>& arr, int lo, int hi) {
+    if (lo >= hi) return;
+    int p = partition(arr, lo, hi);
+    quickSort(arr, lo, p - 1);
+    quickSort(arr, p + 1, hi);
+}`,
+    python: `def partition(arr, lo, hi):
+    pivot = arr[hi]
+    i = lo - 1
+    for j in range(lo, hi):
+        if arr[j] < pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i + 1], arr[hi] = arr[hi], arr[i + 1]
+    return i + 1
+
+def quick_sort(arr, lo=0, hi=None):
+    if hi is None:
+        hi = len(arr) - 1
+    if lo < hi:
+        p = partition(arr, lo, hi)
+        quick_sort(arr, lo, p - 1)
+        quick_sort(arr, p + 1, hi)
+    return arr`,
   },
+
+  "heap-sort": {
+    c: `void siftDown(int arr[], int i, int size) {
+    int largest = i, l = 2*i+1, r = 2*i+2;
+    if (l < size && arr[l] > arr[largest]) largest = l;
+    if (r < size && arr[r] > arr[largest]) largest = r;
+    if (largest != i) {
+        int t = arr[i]; arr[i] = arr[largest]; arr[largest] = t;
+        siftDown(arr, largest, size);
+    }
+}
+void heapSort(int arr[], int n) {
+    for (int i = n/2 - 1; i >= 0; i--) siftDown(arr, i, n);
+    for (int end = n-1; end >= 1; end--) {
+        int t = arr[0]; arr[0] = arr[end]; arr[end] = t;
+        siftDown(arr, 0, end);
+    }
+}`,
+    cpp: `using namespace std;
+void siftDown(vector<int>& arr, int i, int size) {
+    int largest = i, l = 2*i+1, r = 2*i+2;
+    if (l < size && arr[l] > arr[largest]) largest = l;
+    if (r < size && arr[r] > arr[largest]) largest = r;
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        siftDown(arr, largest, size);
+    }
+}
+void heapSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = n/2 - 1; i >= 0; i--) siftDown(arr, i, n);
+    for (int end = n-1; end >= 1; end--) {
+        swap(arr[0], arr[end]);
+        siftDown(arr, 0, end);
+    }
+}`,
+    python: `def sift_down(arr, i, size):
+    largest = i
+    l, r = 2*i+1, 2*i+2
+    if l < size and arr[l] > arr[largest]:
+        largest = l
+    if r < size and arr[r] > arr[largest]:
+        largest = r
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        sift_down(arr, largest, size)
+
+def heap_sort(arr):
+    n = len(arr)
+    for i in range(n // 2 - 1, -1, -1):
+        sift_down(arr, i, n)
+    for end in range(n - 1, 0, -1):
+        arr[0], arr[end] = arr[end], arr[0]
+        sift_down(arr, 0, end)
+    return arr`,
+  },
+
+  "counting-sort": {
+    c: `void countingSort(int arr[], int n, int maxVal) {
+    int* count = calloc(maxVal + 1, sizeof(int));
+    int* output = malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) count[arr[i]]++;
+    for (int i = 1; i <= maxVal; i++) count[i] += count[i-1];
+    for (int i = n - 1; i >= 0; i--) {
+        output[count[arr[i]] - 1] = arr[i];
+        count[arr[i]]--;
+    }
+    memcpy(arr, output, n * sizeof(int));
+    free(count); free(output);
+}`,
+    cpp: `using namespace std;
+void countingSort(vector<int>& arr) {
+    int maxVal = *max_element(arr.begin(), arr.end());
+    vector<int> count(maxVal + 1, 0), output(arr.size());
+    for (int x : arr) count[x]++;
+    for (int i = 1; i <= maxVal; i++) count[i] += count[i-1];
+    for (int i = arr.size() - 1; i >= 0; i--) {
+        output[count[arr[i]] - 1] = arr[i];
+        count[arr[i]]--;
+    }
+    arr = output;
+}`,
+    python: `def counting_sort(arr):
+    max_val = max(arr)
+    count = [0] * (max_val + 1)
+    for x in arr:
+        count[x] += 1
+    for i in range(1, max_val + 1):
+        count[i] += count[i - 1]
+    output = [0] * len(arr)
+    for x in reversed(arr):
+        count[x] -= 1
+        output[count[x]] = x
+    return output`,
+  },
+
+  "radix-sort": {
+    c: `void countingSortByDigit(int arr[], int n, int exp) {
+    int output[n], count[10] = {0};
+    for (int i = 0; i < n; i++) count[(arr[i]/exp) % 10]++;
+    for (int i = 1; i < 10; i++) count[i] += count[i-1];
+    for (int i = n - 1; i >= 0; i--) {
+        int d = (arr[i]/exp) % 10;
+        output[count[d] - 1] = arr[i];
+        count[d]--;
+    }
+    memcpy(arr, output, n * sizeof(int));
+}
+void radixSort(int arr[], int n) {
+    int maxVal = arr[0];
+    for (int i = 1; i < n; i++) if (arr[i] > maxVal) maxVal = arr[i];
+    for (int exp = 1; maxVal/exp > 0; exp *= 10)
+        countingSortByDigit(arr, n, exp);
+}`,
+    cpp: `using namespace std;
+void countingSortByDigit(vector<int>& arr, int exp) {
+    int n = arr.size();
+    vector<int> output(n), count(10, 0);
+    for (int x : arr) count[(x/exp) % 10]++;
+    for (int i = 1; i < 10; i++) count[i] += count[i-1];
+    for (int i = n - 1; i >= 0; i--) {
+        int d = (arr[i]/exp) % 10;
+        output[count[d] - 1] = arr[i];
+        count[d]--;
+    }
+    arr = output;
+}
+void radixSort(vector<int>& arr) {
+    int maxVal = *max_element(arr.begin(), arr.end());
+    for (int exp = 1; maxVal/exp > 0; exp *= 10)
+        countingSortByDigit(arr, exp);
+}`,
+    python: `def counting_sort_by_digit(arr, exp):
+    n = len(arr)
+    output = [0] * n
+    count = [0] * 10
+    for x in arr:
+        count[(x // exp) % 10] += 1
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+    for x in reversed(arr):
+        d = (x // exp) % 10
+        count[d] -= 1
+        output[count[d]] = x
+    return output
+
+def radix_sort(arr):
+    max_val = max(arr)
+    exp = 1
+    while max_val // exp > 0:
+        arr = counting_sort_by_digit(arr, exp)
+        exp *= 10
+    return arr`,
+  },
+
   dijkstra: {
-    label: "Dijkstra's Algorithm", category: "graph",
-    complexity: { time: "O((V+E) log V)", space: "O(V)" },
-    defaultGraph: WEIGHTED_GRAPH,
-    inputs: [{ key: "start", label: "START NODE", kind: "node", default: "A" }],
-    run: (v) => ENGINE["dijkstra"](WEIGHTED_GRAPH, v.start),
+    c: `// simplified: adjacency matrix graph[n][n], 0 = no edge
+void dijkstra(int graph[][MAXN], int n, int src, int dist[]) {
+    int visited[MAXN] = {0};
+    for (int i = 0; i < n; i++) dist[i] = INT_MAX;
+    dist[src] = 0;
+    for (int count = 0; count < n - 1; count++) {
+        int u = -1, best = INT_MAX;
+        for (int v = 0; v < n; v++)
+            if (!visited[v] && dist[v] < best) { best = dist[v]; u = v; }
+        if (u == -1) break;
+        visited[u] = 1;
+        for (int v = 0; v < n; v++)
+            if (graph[u][v] && !visited[v] && dist[u] + graph[u][v] < dist[v])
+                dist[v] = dist[u] + graph[u][v];
+    }
+}`,
+    cpp: `using namespace std;
+vector<int> dijkstra(vector<vector<pair<int,int>>>& adj, int src) {
+    int n = adj.size();
+    vector<int> dist(n, INT_MAX);
+    dist[src] = 0;
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
+    pq.push({0, src});
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;
+        for (auto [v, w] : adj[u]) {
+            if (dist[u] + w < dist[v]) {
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+    return dist;
+}`,
+    python: `import heapq
+
+def dijkstra(graph, start):
+    dist = {node: float('inf') for node in graph}
+    dist[start] = 0
+    pq = [(0, start)]
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]:
+            continue
+        for v, w in graph[u]:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                heapq.heappush(pq, (dist[v], v))
+    return dist`,
   },
+
   "bellman-ford": {
-    label: "Bellman-Ford", category: "graph",
-    complexity: { time: "O(V · E)", space: "O(V)" },
-    defaultGraph: BELLMAN_FORD_GRAPH,
-    inputs: [{ key: "start", label: "START NODE", kind: "node", default: "A" }],
-    run: (v) => ENGINE["bellman-ford"](BELLMAN_FORD_GRAPH, v.start),
+    c: `// edges as arrays: src[], dst[], weight[], m edges, n vertices
+int bellmanFord(int src[], int dst[], int weight[], int m, int n, int source, int dist[]) {
+    for (int i = 0; i < n; i++) dist[i] = INT_MAX;
+    dist[source] = 0;
+    for (int i = 1; i < n; i++)
+        for (int j = 0; j < m; j++)
+            if (dist[src[j]] != INT_MAX && dist[src[j]] + weight[j] < dist[dst[j]])
+                dist[dst[j]] = dist[src[j]] + weight[j];
+    for (int j = 0; j < m; j++)
+        if (dist[src[j]] != INT_MAX && dist[src[j]] + weight[j] < dist[dst[j]])
+            return -1; // negative cycle
+    return 0;
+}`,
+    cpp: `using namespace std;
+bool bellmanFord(vector<array<int,3>>& edges, int n, int source, vector<int>& dist) {
+    dist.assign(n, INT_MAX);
+    dist[source] = 0;
+    for (int i = 1; i < n; i++)
+        for (auto& [u, v, w] : edges)
+            if (dist[u] != INT_MAX && dist[u] + w < dist[v])
+                dist[v] = dist[u] + w;
+    for (auto& [u, v, w] : edges)
+        if (dist[u] != INT_MAX && dist[u] + w < dist[v])
+            return false; // negative cycle detected
+    return true;
+}`,
+    python: `def bellman_ford(edges, nodes, source):
+    dist = {n: float('inf') for n in nodes}
+    dist[source] = 0
+    for _ in range(len(nodes) - 1):
+        for u, v, w in edges:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+    for u, v, w in edges:
+        if dist[u] + w < dist[v]:
+            raise ValueError("Graph contains a negative-weight cycle")
+    return dist`,
   },
+
   "floyd-warshall": {
-    label: "Floyd-Warshall", category: "grid",
-    complexity: { time: "O(V³)", space: "O(V²)" },
-    inputs: [],
-    run: () => ENGINE["floyd-warshall"](WEIGHTED_GRAPH),
+    c: `void floydWarshall(int dist[][MAXN], int n) {
+    for (int k = 0; k < n; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (dist[i][k] + dist[k][j] < dist[i][j])
+                    dist[i][j] = dist[i][k] + dist[k][j];
+}`,
+    cpp: `using namespace std;
+void floydWarshall(vector<vector<int>>& dist) {
+    int n = dist.size();
+    for (int k = 0; k < n; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (dist[i][k] + dist[k][j] < dist[i][j])
+                    dist[i][j] = dist[i][k] + dist[k][j];
+}`,
+    python: `def floyd_warshall(dist):
+    n = len(dist)
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    return dist`,
   },
+
   prim: {
-    label: "Prim's MST", category: "graph",
-    complexity: { time: "O(E log V)", space: "O(V)" },
-    defaultGraph: WEIGHTED_GRAPH,
-    inputs: [{ key: "start", label: "START NODE", kind: "node", default: "A" }],
-    run: (v) => ENGINE["prim"](WEIGHTED_GRAPH, v.start),
+    c: `// adjacency matrix graph[n][n], 0 = no edge
+void prim(int graph[][MAXN], int n) {
+    int key[MAXN], parent[MAXN], inMst[MAXN] = {0};
+    for (int i = 0; i < n; i++) key[i] = INT_MAX;
+    key[0] = 0; parent[0] = -1;
+    for (int count = 0; count < n - 1; count++) {
+        int u = -1, best = INT_MAX;
+        for (int v = 0; v < n; v++)
+            if (!inMst[v] && key[v] < best) { best = key[v]; u = v; }
+        inMst[u] = 1;
+        for (int v = 0; v < n; v++)
+            if (graph[u][v] && !inMst[v] && graph[u][v] < key[v]) {
+                key[v] = graph[u][v]; parent[v] = u;
+            }
+    }
+}`,
+    cpp: `using namespace std;
+void prim(vector<vector<pair<int,int>>>& adj, int start) {
+    int n = adj.size();
+    vector<int> key(n, INT_MAX);
+    vector<bool> inMst(n, false);
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
+    key[start] = 0;
+    pq.push({0, start});
+    while (!pq.empty()) {
+        int u = pq.top().second; pq.pop();
+        if (inMst[u]) continue;
+        inMst[u] = true;
+        for (auto [v, w] : adj[u])
+            if (!inMst[v] && w < key[v]) {
+                key[v] = w;
+                pq.push({key[v], v});
+            }
+    }
+}`,
+    python: `import heapq
+
+def prim(graph, start):
+    visited = {start}
+    edges = [(w, start, v) for v, w in graph[start]]
+    heapq.heapify(edges)
+    mst = []
+    while edges and len(visited) < len(graph):
+        w, u, v = heapq.heappop(edges)
+        if v in visited:
+            continue
+        visited.add(v)
+        mst.append((u, v, w))
+        for to, weight in graph[v]:
+            if to not in visited:
+                heapq.heappush(edges, (weight, v, to))
+    return mst`,
   },
+
   kruskal: {
-    label: "Kruskal's MST", category: "graph",
-    complexity: { time: "O(E log E)", space: "O(V)" },
-    defaultGraph: WEIGHTED_GRAPH,
-    inputs: [],
-    run: () => ENGINE["kruskal"](WEIGHTED_GRAPH),
+    c: `int find(int parent[], int x) { return parent[x]==x ? x : (parent[x]=find(parent,parent[x])); }
+void unionSet(int parent[], int a, int b) { parent[find(parent,a)] = find(parent,b); }
+
+// edges sorted ascending by weight beforehand: src[], dst[], weight[], m edges
+void kruskal(int src[], int dst[], int weight[], int m, int n) {
+    int parent[MAXN];
+    for (int i = 0; i < n; i++) parent[i] = i;
+    int mstWeight = 0, count = 0;
+    for (int i = 0; i < m && count < n - 1; i++) {
+        int ru = find(parent, src[i]), rv = find(parent, dst[i]);
+        if (ru != rv) {
+            unionSet(parent, ru, rv);
+            mstWeight += weight[i];
+            count++;
+        }
+    }
+}`,
+    cpp: `using namespace std;
+struct DSU {
+    vector<int> parent;
+    DSU(int n) : parent(n) { iota(parent.begin(), parent.end(), 0); }
+    int find(int x) { return parent[x]==x ? x : parent[x]=find(parent[x]); }
+    bool unite(int a, int b) {
+        int ra = find(a), rb = find(b);
+        if (ra == rb) return false;
+        parent[ra] = rb;
+        return true;
+    }
+};
+int kruskal(vector<array<int,3>>& edges, int n) {
+    sort(edges.begin(), edges.end(), [](auto& a, auto& b){ return a[2] < b[2]; });
+    DSU dsu(n);
+    int totalWeight = 0;
+    for (auto& [u, v, w] : edges)
+        if (dsu.unite(u, v)) totalWeight += w;
+    return totalWeight;
+}`,
+    python: `def find(parent, x):
+    if parent[x] != x:
+        parent[x] = find(parent, parent[x])
+    return parent[x]
+
+def kruskal(nodes, edges):
+    parent = {n: n for n in nodes}
+    mst = []
+    for u, v, w in sorted(edges, key=lambda e: e[2]):
+        ru, rv = find(parent, u), find(parent, v)
+        if ru != rv:
+            parent[ru] = rv
+            mst.append((u, v, w))
+    return mst`,
   },
 
-  /* ---------- NETWORK FLOW ---------- */
+  "topo-sort": {
+    c: `void dfs(int u, int** adj, int* adjSize, int visited[], int order[], int* idx) {
+    visited[u] = 1;
+    for (int k = 0; k < adjSize[u]; k++)
+        if (!visited[adj[u][k]]) dfs(adj[u][k], adj, adjSize, visited, order, idx);
+    order[(*idx)++] = u; // will be reversed at the end
+}
+void topoSort(int n, int** adj, int* adjSize, int order[]) {
+    int visited[MAXN] = {0}, idx = 0;
+    for (int u = 0; u < n; u++) if (!visited[u]) dfs(u, adj, adjSize, visited, order, &idx);
+    for (int i = 0; i < n/2; i++) { int t=order[i]; order[i]=order[n-1-i]; order[n-1-i]=t; }
+}`,
+    cpp: `using namespace std;
+void dfs(int u, vector<vector<int>>& adj, vector<bool>& visited, stack<int>& order) {
+    visited[u] = true;
+    for (int v : adj[u])
+        if (!visited[v]) dfs(v, adj, visited, order);
+    order.push(u);
+}
+vector<int> topoSort(vector<vector<int>>& adj) {
+    int n = adj.size();
+    vector<bool> visited(n, false);
+    stack<int> order;
+    for (int u = 0; u < n; u++) if (!visited[u]) dfs(u, adj, visited, order);
+    vector<int> result;
+    while (!order.empty()) { result.push_back(order.top()); order.pop(); }
+    return result;
+}`,
+    python: `def topo_sort(graph, nodes):
+    visited = set()
+    order = []
+
+    def dfs(u):
+        visited.add(u)
+        for v in graph.get(u, []):
+            if v not in visited:
+                dfs(v)
+        order.append(u)
+
+    for n in nodes:
+        if n not in visited:
+            dfs(n)
+    return order[::-1]`,
+  },
+
   "ford-fulkerson": {
-    label: "Ford-Fulkerson (Edmonds-Karp)", category: "graph",
-    complexity: { time: "O(E · max flow)", space: "O(V + E)" },
-    defaultGraph: FLOW_GRAPH,
-    inputs: [
-      { key: "source", label: "SOURCE", kind: "node", default: "S" },
-      { key: "sink", label: "SINK", kind: "node", default: "T" },
-    ],
-    run: (v) => ENGINE["ford-fulkerson"](FLOW_GRAPH, v.source, v.sink),
+    c: `// simplified Edmonds-Karp on adjacency matrix capacity[n][n]
+int bfsPath(int capacity[][MAXN], int n, int s, int t, int parent[]) {
+    int visited[MAXN] = {0}, queue[MAXN], front=0, back=0;
+    queue[back++] = s; visited[s] = 1; parent[s] = -1;
+    while (front < back) {
+        int u = queue[front++];
+        for (int v = 0; v < n; v++)
+            if (!visited[v] && capacity[u][v] > 0) {
+                visited[v] = 1; parent[v] = u; queue[back++] = v;
+                if (v == t) return 1;
+            }
+    }
+    return 0;
+}
+int fordFulkerson(int capacity[][MAXN], int n, int s, int t) {
+    int parent[MAXN], maxFlow = 0;
+    while (bfsPath(capacity, n, s, t, parent)) {
+        int pathFlow = INT_MAX;
+        for (int v = t; v != s; v = parent[v])
+            pathFlow = pathFlow < capacity[parent[v]][v] ? pathFlow : capacity[parent[v]][v];
+        for (int v = t; v != s; v = parent[v]) {
+            capacity[parent[v]][v] -= pathFlow;
+            capacity[v][parent[v]] += pathFlow;
+        }
+        maxFlow += pathFlow;
+    }
+    return maxFlow;
+}`,
+    cpp: `using namespace std;
+int fordFulkerson(vector<vector<int>> capacity, int s, int t) {
+    int n = capacity.size(), maxFlow = 0;
+    vector<int> parent(n);
+    auto bfsPath = [&]() {
+        fill(parent.begin(), parent.end(), -2);
+        parent[s] = -1;
+        queue<int> q; q.push(s);
+        while (!q.empty()) {
+            int u = q.front(); q.pop();
+            for (int v = 0; v < n; v++)
+                if (parent[v] == -2 && capacity[u][v] > 0) {
+                    parent[v] = u;
+                    if (v == t) return true;
+                    q.push(v);
+                }
+        }
+        return false;
+    };
+    while (bfsPath()) {
+        int pathFlow = INT_MAX;
+        for (int v = t; v != s; v = parent[v])
+            pathFlow = min(pathFlow, capacity[parent[v]][v]);
+        for (int v = t; v != s; v = parent[v]) {
+            capacity[parent[v]][v] -= pathFlow;
+            capacity[v][parent[v]] += pathFlow;
+        }
+        maxFlow += pathFlow;
+    }
+    return maxFlow;
+}`,
+    python: `from collections import deque
+
+def bfs_path(capacity, source, sink, parent):
+    visited = {source}
+    queue = deque([source])
+    while queue:
+        u = queue.popleft()
+        for v, cap in capacity[u].items():
+            if v not in visited and cap > 0:
+                visited.add(v)
+                parent[v] = u
+                if v == sink:
+                    return True
+                queue.append(v)
+    return False
+
+def ford_fulkerson(capacity, source, sink):
+    max_flow = 0
+    parent = {}
+    while bfs_path(capacity, source, sink, parent):
+        path_flow = float('inf')
+        v = sink
+        while v != source:
+            u = parent[v]
+            path_flow = min(path_flow, capacity[u][v])
+            v = u
+        v = sink
+        while v != source:
+            u = parent[v]
+            capacity[u][v] -= path_flow
+            capacity[v][u] = capacity.get(v, {}).get(u, 0) + path_flow
+            v = u
+        max_flow += path_flow
+    return max_flow`,
+  },
+
+  "fibonacci-dp": {
+    c: `int fibonacci(int n) {
+    if (n <= 1) return n;
+    int dp[n + 1];
+    dp[0] = 0; dp[1] = 1;
+    for (int i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];
+    return dp[n];
+}`,
+    cpp: `using namespace std;
+int fibonacci(int n) {
+    if (n <= 1) return n;
+    vector<int> dp(n + 1);
+    dp[0] = 0; dp[1] = 1;
+    for (int i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];
+    return dp[n];
+}`,
+    python: `def fibonacci(n):
+    if n <= 1:
+        return n
+    dp = [0] * (n + 1)
+    dp[1] = 1
+    for i in range(2, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]
+    return dp[n]`,
+  },
+
+  "rod-cutting": {
+    c: `int rodCutting(int price[], int n) {
+    int dp[n + 1];
+    dp[0] = 0;
+    for (int len = 1; len <= n; len++) {
+        int best = INT_MIN;
+        for (int cut = 1; cut <= len; cut++)
+            if (price[cut-1] + dp[len-cut] > best) best = price[cut-1] + dp[len-cut];
+        dp[len] = best;
+    }
+    return dp[n];
+}`,
+    cpp: `using namespace std;
+int rodCutting(vector<int>& price) {
+    int n = price.size();
+    vector<int> dp(n + 1, 0);
+    for (int len = 1; len <= n; len++) {
+        int best = INT_MIN;
+        for (int cut = 1; cut <= len; cut++)
+            best = max(best, price[cut-1] + dp[len-cut]);
+        dp[len] = best;
+    }
+    return dp[n];
+}`,
+    python: `def rod_cutting(price):
+    n = len(price)
+    dp = [0] * (n + 1)
+    for length in range(1, n + 1):
+        dp[length] = max(price[cut - 1] + dp[length - cut] for cut in range(1, length + 1))
+    return dp[n]`,
+  },
+
+  "coin-change-dp": {
+    c: `int coinChange(int coins[], int m, int amount) {
+    int dp[amount + 1];
+    dp[0] = 0;
+    for (int a = 1; a <= amount; a++) {
+        dp[a] = INT_MAX;
+        for (int i = 0; i < m; i++)
+            if (coins[i] <= a && dp[a - coins[i]] != INT_MAX)
+                dp[a] = dp[a] < dp[a-coins[i]]+1 ? dp[a] : dp[a-coins[i]]+1;
+    }
+    return dp[amount] == INT_MAX ? -1 : dp[amount];
+}`,
+    cpp: `using namespace std;
+int coinChange(vector<int>& coins, int amount) {
+    vector<int> dp(amount + 1, INT_MAX);
+    dp[0] = 0;
+    for (int a = 1; a <= amount; a++)
+        for (int c : coins)
+            if (c <= a && dp[a - c] != INT_MAX)
+                dp[a] = min(dp[a], dp[a - c] + 1);
+    return dp[amount] == INT_MAX ? -1 : dp[amount];
+}`,
+    python: `def coin_change(coins, amount):
+    dp = [0] + [float('inf')] * amount
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c <= a and dp[a - c] != float('inf'):
+                dp[a] = min(dp[a], dp[a - c] + 1)
+    return dp[amount] if dp[amount] != float('inf') else -1`,
+  },
+
+  "01-knapsack": {
+    c: `int knapsack01(int weight[], int value[], int n, int capacity) {
+    int dp[n+1][capacity+1];
+    for (int i = 0; i <= n; i++)
+        for (int w = 0; w <= capacity; w++) {
+            if (i == 0 || w == 0) dp[i][w] = 0;
+            else if (weight[i-1] <= w)
+                dp[i][w] = value[i-1] + dp[i-1][w-weight[i-1]] > dp[i-1][w]
+                           ? value[i-1] + dp[i-1][w-weight[i-1]] : dp[i-1][w];
+            else dp[i][w] = dp[i-1][w];
+        }
+    return dp[n][capacity];
+}`,
+    cpp: `using namespace std;
+int knapsack01(vector<int>& weight, vector<int>& value, int capacity) {
+    int n = weight.size();
+    vector<vector<int>> dp(n+1, vector<int>(capacity+1, 0));
+    for (int i = 1; i <= n; i++)
+        for (int w = 0; w <= capacity; w++) {
+            dp[i][w] = dp[i-1][w];
+            if (weight[i-1] <= w)
+                dp[i][w] = max(dp[i][w], value[i-1] + dp[i-1][w-weight[i-1]]);
+        }
+    return dp[n][capacity];
+}`,
+    python: `def knapsack_01(weights, values, capacity):
+    n = len(weights)
+    dp = [[0] * (capacity + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for w in range(capacity + 1):
+            dp[i][w] = dp[i - 1][w]
+            if weights[i - 1] <= w:
+                dp[i][w] = max(dp[i][w], values[i - 1] + dp[i - 1][w - weights[i - 1]])
+    return dp[n][capacity]`,
+  },
+
+  lcs: {
+    c: `int lcs(char* s1, char* s2, int m, int n) {
+    int dp[m+1][n+1];
+    for (int i = 0; i <= m; i++)
+        for (int j = 0; j <= n; j++) {
+            if (i == 0 || j == 0) dp[i][j] = 0;
+            else if (s1[i-1] == s2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+            else dp[i][j] = dp[i-1][j] > dp[i][j-1] ? dp[i-1][j] : dp[i][j-1];
+        }
+    return dp[m][n];
+}`,
+    cpp: `using namespace std;
+int lcs(const string& s1, const string& s2) {
+    int m = s1.size(), n = s2.size();
+    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+    for (int i = 1; i <= m; i++)
+        for (int j = 1; j <= n; j++) {
+            if (s1[i-1] == s2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+            else dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
+        }
+    return dp[m][n];
+}`,
+    python: `def lcs(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if s1[i - 1] == s2[j - 1]:
+                dp[i][j] = dp[i - 1][j - 1] + 1
+            else:
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+    return dp[m][n]`,
+  },
+
+  "activity-selection": {
+    c: `// activities pre-sorted by finish time ascending: start[], finish[], n
+int activitySelection(int start[], int finish[], int n, int selected[]) {
+    int count = 0;
+    selected[count++] = 0;
+    int lastFinish = finish[0];
+    for (int i = 1; i < n; i++) {
+        if (start[i] >= lastFinish) {
+            selected[count++] = i;
+            lastFinish = finish[i];
+        }
+    }
+    return count;
+}`,
+    cpp: `using namespace std;
+vector<int> activitySelection(vector<int>& start, vector<int>& finish) {
+    int n = start.size();
+    vector<int> idx(n);
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b){ return finish[a] < finish[b]; });
+    vector<int> selected = { idx[0] };
+    int lastFinish = finish[idx[0]];
+    for (int i = 1; i < n; i++) {
+        if (start[idx[i]] >= lastFinish) {
+            selected.push_back(idx[i]);
+            lastFinish = finish[idx[i]];
+        }
+    }
+    return selected;
+}`,
+    python: `def activity_selection(starts, finishes):
+    activities = sorted(range(len(starts)), key=lambda i: finishes[i])
+    selected = [activities[0]]
+    last_finish = finishes[activities[0]]
+    for i in activities[1:]:
+        if starts[i] >= last_finish:
+            selected.append(i)
+            last_finish = finishes[i]
+    return selected`,
+  },
+
+  "fractional-knapsack": {
+    c: `typedef struct { double weight, value, ratio; } Item;
+int cmp(const void* a, const void* b) {
+    double r1 = ((Item*)a)->ratio, r2 = ((Item*)b)->ratio;
+    return r2 > r1 ? 1 : -1;
+}
+double fractionalKnapsack(Item items[], int n, double capacity) {
+    qsort(items, n, sizeof(Item), cmp);
+    double totalValue = 0;
+    for (int i = 0; i < n && capacity > 0; i++) {
+        if (items[i].weight <= capacity) {
+            capacity -= items[i].weight;
+            totalValue += items[i].value;
+        } else {
+            totalValue += items[i].value * (capacity / items[i].weight);
+            capacity = 0;
+        }
+    }
+    return totalValue;
+}`,
+    cpp: `using namespace std;
+double fractionalKnapsack(vector<double> weight, vector<double> value, double capacity) {
+    int n = weight.size();
+    vector<int> idx(n);
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b){
+        return value[a]/weight[a] > value[b]/weight[b];
+    });
+    double totalValue = 0;
+    for (int i : idx) {
+        if (capacity <= 0) break;
+        if (weight[i] <= capacity) {
+            capacity -= weight[i];
+            totalValue += value[i];
+        } else {
+            totalValue += value[i] * (capacity / weight[i]);
+            capacity = 0;
+        }
+    }
+    return totalValue;
+}`,
+    python: `def fractional_knapsack(weights, values, capacity):
+    items = sorted(zip(weights, values), key=lambda x: x[1]/x[0], reverse=True)
+    total_value = 0.0
+    for w, v in items:
+        if capacity <= 0:
+            break
+        if w <= capacity:
+            capacity -= w
+            total_value += v
+        else:
+            total_value += v * (capacity / w)
+            capacity = 0
+    return total_value`,
+  },
+
+  "huffman-coding": {
+    c: `// simplified: uses a naive O(n^2) priority "queue" via linear scan for min
+typedef struct Node { char label[32]; int freq; struct Node *left, *right; } Node;
+
+Node* extractMin(Node* nodes[], int* n) {
+    int minIdx = 0;
+    for (int i = 1; i < *n; i++) if (nodes[i]->freq < nodes[minIdx]->freq) minIdx = i;
+    Node* result = nodes[minIdx];
+    nodes[minIdx] = nodes[--(*n)];
+    return result;
+}
+Node* buildHuffman(Node* nodes[], int n) {
+    while (n > 1) {
+        Node* a = extractMin(nodes, &n);
+        Node* b = extractMin(nodes, &n);
+        Node* merged = malloc(sizeof(Node));
+        merged->freq = a->freq + b->freq;
+        merged->left = a; merged->right = b;
+        nodes[n++] = merged;
+    }
+    return nodes[0];
+}`,
+    cpp: `using namespace std;
+struct Node {
+    string label; int freq;
+    Node *left = nullptr, *right = nullptr;
+};
+struct Cmp { bool operator()(Node* a, Node* b) { return a->freq > b->freq; } };
+
+Node* buildHuffman(vector<Node*> leaves) {
+    priority_queue<Node*, vector<Node*>, Cmp> pq(leaves.begin(), leaves.end());
+    while (pq.size() > 1) {
+        Node* a = pq.top(); pq.pop();
+        Node* b = pq.top(); pq.pop();
+        Node* merged = new Node{a->label + b->label, a->freq + b->freq, a, b};
+        pq.push(merged);
+    }
+    return pq.top();
+}`,
+    python: `import heapq
+from itertools import count
+
+def build_huffman(symbols, freqs):
+    counter = count()
+    heap = [[f, next(counter), s, None, None] for s, f in zip(symbols, freqs)]
+    heapq.heapify(heap)
+    while len(heap) > 1:
+        f1, _, l1, left1, right1 = heapq.heappop(heap)
+        f2, _, l2, left2, right2 = heapq.heappop(heap)
+        merged = [f1 + f2, next(counter), l1 + l2,
+                  (l1, left1, right1), (l2, left2, right2)]
+        heapq.heappush(heap, merged)
+    return heap[0]  # root of Huffman tree`,
   },
 };
-
-/* ---------------- ROUTER ---------------- */
-const root = document.getElementById("page-root");
-const crumbs = document.getElementById("crumbs");
-
-/* Clickable breadcrumb: items = [{label, href?}], last item is the current page */
-function setCrumbs(items) {
-  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  crumbs.innerHTML = items
-    .map((it, i) =>
-      it.href && i < items.length - 1
-        ? `<a href="${it.href}">${esc(it.label)}</a>`
-        : `<span class="crumb-cur">${esc(it.label)}</span>`)
-    .join('<span class="sep">/</span>');
-}
-
-/* Dark / light theme toggle (remembered in localStorage) */
-const themeBtn = document.getElementById("theme-toggle");
-function applyTheme(t) {
-  document.documentElement.setAttribute("data-theme", t);
-  try { localStorage.setItem("kle-theme", t); } catch (e) {}
-  themeBtn.textContent = t === "light" ? "☾ Dark mode" : "☀ Light mode";
-}
-applyTheme(document.documentElement.getAttribute("data-theme") || "light");
-themeBtn.addEventListener("click", () =>
-  applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light"));
-
-function router() {
-  const hash = location.hash.replace(/^#\/?/, "");
-  const parts = hash.split("/").filter(Boolean);
-  window.scrollTo(0, 0);
-  if (parts.length === 0) return renderHome();
-  if (parts[0] === "module" && parts[1]) return renderModule(parts[1]);
-  if (parts[0] === "topic" && parts[1]) return renderTopic(parts[1]);
-  if (parts[0] === "lab" && parts[1]) return renderLab(parts[1]);
-  return renderHome();
-}
-window.addEventListener("hashchange", router);
-
-/* ---------------- SIDEBAR ---------------- */
-function renderSidebar(activeTopicId) {
-  const nav = document.getElementById("syllabus-nav");
-  nav.innerHTML = "";
-  SYLLABUS.forEach((mod, mi) => {
-    const isOpen = mod.topics.some((t) => t.id === activeTopicId);
-    const block = document.createElement("div");
-    block.className = "module-block" + (isOpen ? " open" : "");
-
-    const head = document.createElement("div");
-    head.className = "module-head";
-    head.innerHTML = `<span><span class="idx">${String(mi + 1).padStart(2, "0")}</span>${mod.title}</span><span class="chev">›</span>`;
-    head.onclick = () => {
-      block.classList.toggle("open");
-    };
-    block.appendChild(head);
-
-    const list = document.createElement("div");
-    list.className = "topic-list";
-    mod.topics.forEach((t) => {
-      const item = document.createElement("a");
-      item.href = `#/topic/${t.id}`;
-      item.className = "topic-item" + (t.id === activeTopicId ? " active" : "");
-      item.innerHTML = `<span>${t.name}</span>${t.live ? '<span class="live-tag">LIVE</span>' : ""}`;
-      list.appendChild(item);
-    });
-    block.appendChild(list);
-    nav.appendChild(block);
-  });
-}
-renderSidebar(null);
-
-document.getElementById("menu-toggle").onclick = () => {
-  document.getElementById("sidebar").classList.toggle("open");
-};
-
-/* ---------------- TERMINAL FOOTER ---------------- */
-const terminalLines = [
-  "SYSTEM READY // ALL MODULES INDEXED",
-  "STEP-ENGINE v1.0 LOADED",
-  "TIME-TRAVEL SCRUB: ENABLED",
-  "SELECT A TOPIC TO BEGIN",
-];
-let tlIdx = 0;
-function typeTerminal() {
-  const el = document.getElementById("terminal-text");
-  const text = terminalLines[tlIdx % terminalLines.length];
-  let i = 0;
-  el.textContent = "";
-  const iv = setInterval(() => {
-    el.textContent = text.slice(0, i++);
-    if (i > text.length) {
-      clearInterval(iv);
-      setTimeout(() => {
-        tlIdx++;
-        typeTerminal();
-      }, 1800);
-    }
-  }, 28);
-}
-typeTerminal();
-
-/* ---------------- HOME ---------------- */
-function renderHome() {
-  setCrumbs([{ label: "HOME" }]);
-  renderSidebar(null);
-  root.innerHTML = `
-    <section class="hero">
-      <h1>THINK IN <em>STEPS.</em><br/>SEE THE MACHINE.</h1>
-      <p>The Kinetic Logic Engine is an interactive systems-view of data structures & algorithms — every module of the syllabus, laid out, explained, and where possible, made to run in front of you, one state transition at a time.</p>
-      <div class="cta-row">
-        <a href="#/lab/bubble-sort" class="btn primary">ENTER THE LOGIC LAB →</a>
-        <a href="#/module/sorting" class="btn">BROWSE SYLLABUS</a>
-      </div>
-    </section>
-
-    <h2 style="font-size:22px;margin-bottom:16px;color:var(--ink-0);">MODULE INDEX</h2>
-    <div class="module-grid" id="module-grid"></div>
-
-    <section class="philosophy">
-      <h2>Why step-by-step.</h2>
-      <p>Algorithms fail to be intuitive not because they're conceptually hard, but because textbook descriptions collapse dozens of state transitions into a single paragraph. The Logic Lab refuses to collapse anything: every comparison, swap, and pointer movement is its own discrete, scrubbable frame — paired with the exact pseudocode line and variable state that produced it.</p>
-    </section>
-  `;
-  const grid = document.getElementById("module-grid");
-  SYLLABUS.forEach((mod, mi) => {
-    const card = document.createElement("a");
-    card.href = `#/module/${mod.id}`;
-    card.className = "module-card";
-    const liveCount = mod.topics.filter((t) => t.live).length;
-    card.innerHTML = `
-      <div class="idx">MODULE ${String(mi + 1).padStart(2, "0")}</div>
-      <h3>${mod.title}</h3>
-      <p>${mod.desc}</p>
-      ${liveCount ? `<div class="badge-live">${liveCount} LIVE VISUALIZER${liveCount > 1 ? "S" : ""}</div>` : ""}
-    `;
-    grid.appendChild(card);
-  });
-}
-
-/* ---------------- MODULE PAGE ---------------- */
-function renderModule(id) {
-  const mod = SYLLABUS.find((m) => m.id === id);
-  if (!mod) return renderHome();
-  setCrumbs([{ label: "HOME", href: "#/" }, { label: mod.title.toUpperCase() }]);
-  renderSidebar(null);
-  root.innerHTML = `
-    <div class="content-header">
-      <div class="eyebrow">MODULE</div>
-      <h1>${mod.title}</h1>
-      <p class="prose" style="margin-top:10px;">${mod.desc}</p>
-    </div>
-    <div class="topic-grid" id="topic-grid"></div>
-  `;
-  const grid = document.getElementById("topic-grid");
-  mod.topics.forEach((t) => {
-    const row = document.createElement("a");
-    row.href = t.live ? `#/lab/${t.visualizer}` : `#/topic/${t.id}`;
-    row.className = "topic-row";
-    row.innerHTML = `
-      <span class="t-name">${t.name}</span>
-      <span class="t-tag ${t.live ? "live" : ""}">${t.live ? "LOGIC LAB →" : "READ"}</span>
-    `;
-    grid.appendChild(row);
-  });
-}
-
-/* ---------------- TOPIC PAGE ---------------- */
-function renderTopic(id) {
-  let mod = null,
-    topic = null;
-  SYLLABUS.forEach((m) => {
-    const t = m.topics.find((t) => t.id === id);
-    if (t) {
-      mod = m;
-      topic = t;
-    }
-  });
-  if (!topic) return renderHome();
-  const content = CONTENT[id];
-  setCrumbs([{ label: "HOME", href: "#/" }, { label: mod.title.toUpperCase(), href: `#/module/${mod.id}` }, { label: topic.name.toUpperCase() }]);
-  renderSidebar(id);
-
-  const idxInMod = mod.topics.findIndex((t) => t.id === id);
-  const prev = mod.topics[idxInMod - 1];
-  const next = mod.topics[idxInMod + 1];
-
-  root.innerHTML = `
-    <div class="content-header">
-      <div class="eyebrow">${mod.title}</div>
-      <h1>${topic.name} ${topic.live ? '<span class="badge-live">LIVE VISUALIZER</span>' : ""}</h1>
-      ${content && content.complexity ? `
-        <div class="complexity-row">
-          <div class="chip">TIME &nbsp;<b>${content.complexity.time}</b></div>
-          <div class="chip">SPACE &nbsp;<b>${content.complexity.space}</b></div>
-        </div>` : ""}
-      ${content ? `<p class="prose" style="margin-top:16px;">${content.summary}</p>` : ""}
-    </div>
-
-    ${topic.live ? `<div style="margin-bottom:22px;"><a href="#/lab/${topic.visualizer}" class="btn primary">OPEN IN LOGIC LAB →</a></div>` : ""}
-
-    <div class="module">
-      <div class="prose">
-        ${content ? content.body.map((p) => `<p>${p}</p>`).join("") : "<p>Content for this topic is being indexed.</p>"}
-      </div>
-      ${content && content.keypoints ? `
-        <div class="state-block">
-          <div class="label">Key Points</div>
-          <ul class="keypoints">${content.keypoints.map((k) => `<li>${k}</li>`).join("")}</ul>
-        </div>` : ""}
-    </div>
-
-    <div class="sibling-nav">
-      <a href="${prev ? `#/topic/${prev.id}` : "#"}">${prev ? "← " + prev.name : ""}</a>
-      <a href="${next ? `#/topic/${next.id}` : "#"}">${next ? next.name + " →" : ""}</a>
-    </div>
-  `;
-}
-
-/* ================================================================
-   LOGIC LAB — split view visualizer + state machine + scrub bar
-   ================================================================ */
-let LAB_STATE = {
-  steps: [],
-  idx: 0,
-  playing: false,
-  timer: null,
-  speed: 500,
-  vis: null,
-};
-
-function renderLab(visId) {
-  const vis = VISUALIZERS[visId];
-  if (!vis) return renderHome();
-
-  // find matching topic for breadcrumb/sidebar highlight
-  let topicId = null;
-  SYLLABUS.forEach((m) => m.topics.forEach((t) => { if (t.visualizer === visId) topicId = t.id; }));
-  setCrumbs([{ label: "HOME", href: "#/" }, { label: "LOGIC LAB", href: "#/lab/bubble-sort" }, { label: vis.label.toUpperCase() }]);
-  renderSidebar(topicId);
-
-  root.innerHTML = `
-    <div class="content-header">
-      <div class="eyebrow">LOGIC LAB</div>
-      <h1>${vis.label}</h1>
-    </div>
-
-    <div class="lab-grid">
-      <div class="lab-panel">
-        <h4>Visual Canvas</h4>
-        <div class="canvas-wrap" id="canvas-wrap"></div>
-        <div class="controls" id="controls"></div>
-      </div>
-      <div class="lab-panel">
-        <h4>State Machine</h4>
-        <div class="state-block">
-          <div class="label-row">
-            <div class="label">Code</div>
-            <div class="lang-tabs" id="lang-tabs">
-              <button class="lang-tab active" data-lang="pseudo">PSEUDOCODE</button>
-              <button class="lang-tab" data-lang="c">C</button>
-              <button class="lang-tab" data-lang="cpp">C++</button>
-              <button class="lang-tab" data-lang="python">PYTHON</button>
-            </div>
-          </div>
-          <div class="pseudo" id="pseudo"></div>
-        </div>
-        <div class="state-block">
-          <div class="label">Variables</div>
-          <table class="vars-table" id="vars-table"><tbody></tbody></table>
-        </div>
-        <div class="state-block">
-          <div class="label">Step Log</div>
-          <div class="step-log" id="step-log"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="module" style="margin-top:16px;">
-      <div class="module-title-row"><span class="num">COMPLEXITY</span></div>
-      <div class="complexity-strip">
-        <div class="chip">TIME &nbsp;<b>${vis.complexity ? vis.complexity.time : "—"}</b></div>
-        <div class="chip">SPACE &nbsp;<b>${vis.complexity ? vis.complexity.space : "—"}</b></div>
-      </div>
-    </div>
-  `;
-
-  LAB_STATE = { steps: [], idx: 0, playing: false, timer: null, speed: 1100, vis: { id: visId, ...vis }, codeTab: "pseudo" };
-
-  document.querySelectorAll("#lang-tabs .lang-tab").forEach((btn) => {
-    btn.onclick = () => {
-      document.querySelectorAll("#lang-tabs .lang-tab").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      LAB_STATE.codeTab = btn.dataset.lang;
-      renderStep();
-    };
-  });
-
-  buildInputsPanel(visId);
-}
-
-function buildInputsPanel(visId) {
-  const vis = VISUALIZERS[visId];
-  const controls = document.getElementById("controls");
-  let inputsHtml = `<div class="inputs-row" id="inputs-row">`;
-
-  (vis.inputs || []).forEach((spec) => {
-    if (spec.kind === "node") {
-      const nodes = vis.defaultGraph.nodes;
-      inputsHtml += `
-        <div class="field">
-          <label>${spec.label}</label>
-          <select id="in-${spec.key}">
-            ${nodes.map((n) => `<option value="${n}" ${n === spec.default ? "selected" : ""}>${n}</option>`).join("")}
-          </select>
-        </div>`;
-    } else {
-      const inputType = spec.kind === "int" ? "number" : "text";
-      const val = Array.isArray(spec.default) ? spec.default.join(",") : spec.default;
-      inputsHtml += `
-        <div class="field" ${spec.wide ? 'style="flex:2;min-width:240px;"' : ""}>
-          <label>${spec.label}</label>
-          <input type="${inputType}" id="in-${spec.key}" value="${val}" />
-        </div>`;
-    }
-  });
-
-  inputsHtml += `</div>`;
-  controls.innerHTML = `
-    <div class="controls-row">
-      <button class="ctrl-btn" id="btn-first" title="First">⏮</button>
-      <button class="ctrl-btn" id="btn-prev" title="Step back">◀</button>
-      <button class="ctrl-btn play" id="btn-play" title="Play/Pause">▶</button>
-      <button class="ctrl-btn" id="btn-next" title="Step forward">▶|</button>
-      <button class="ctrl-btn" id="btn-last" title="Last">⏭</button>
-      <input type="range" id="scrub" min="0" max="0" value="0" />
-      <span class="step-counter" id="step-counter">0 / 0</span>
-      <select class="speed-select" id="speed-select">
-        <option value="1800">SLOW</option>
-        <option value="1100" selected>NORMAL</option>
-        <option value="550">FAST</option>
-      </select>
-    </div>
-    ${inputsHtml}
-  `;
-
-  document.getElementById("btn-first").onclick = () => gotoStep(0);
-  document.getElementById("btn-prev").onclick = () => gotoStep(LAB_STATE.idx - 1);
-  document.getElementById("btn-next").onclick = () => gotoStep(LAB_STATE.idx + 1);
-  document.getElementById("btn-last").onclick = () => gotoStep(LAB_STATE.steps.length - 1);
-  document.getElementById("btn-play").onclick = togglePlay;
-  document.getElementById("scrub").oninput = (e) => gotoStep(parseInt(e.target.value, 10));
-  document.getElementById("speed-select").onchange = (e) => {
-    LAB_STATE.speed = parseInt(e.target.value, 10);
-    if (LAB_STATE.playing) {
-      stopPlay();
-      togglePlay();
-    }
-  };
-
-  // Live auto-update: re-run the moment any input value changes — no separate Run step.
-  (vis.inputs || []).forEach((spec) => {
-    const el = document.getElementById(`in-${spec.key}`);
-    const evt = spec.kind === "node" ? "change" : "input";
-    el.addEventListener(evt, () => runVisualizer(visId));
-  });
-
-  runVisualizer(visId);
-}
-
-function runVisualizer(visId) {
-  const vis = VISUALIZERS[visId];
-  stopPlay();
-  let steps;
-  try {
-    const values = {};
-    (vis.inputs || []).forEach((spec) => {
-      const el = document.getElementById(`in-${spec.key}`);
-      const parsed = PARSERS[spec.kind](el.value);
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        Object.assign(values, parsed);
-      } else {
-        values[spec.key] = parsed;
-      }
-    });
-    steps = vis.run(values);
-    if (!steps || !steps.length) throw new Error("no steps produced — check your input");
-  } catch (e) {
-    steps = [{ array: [], grid: [[0]], rowLabels: [""], colLabels: [""], highlights: {}, line: 0, vars: {}, message: "Invalid input — " + e.message }];
-  }
-  LAB_STATE.steps = steps;
-  LAB_STATE.idx = 0;
-  const scrub = document.getElementById("scrub");
-  scrub.max = String(Math.max(0, steps.length - 1));
-  scrub.value = "0";
-  renderStep();
-}
-
-function gotoStep(n) {
-  if (!LAB_STATE.steps.length) return;
-  LAB_STATE.idx = Math.max(0, Math.min(LAB_STATE.steps.length - 1, n));
-  document.getElementById("scrub").value = String(LAB_STATE.idx);
-  renderStep();
-}
-
-function togglePlay() {
-  if (LAB_STATE.playing) {
-    stopPlay();
-    return;
-  }
-  LAB_STATE.playing = true;
-  document.getElementById("btn-play").textContent = "❚❚";
-  LAB_STATE.timer = setInterval(() => {
-    if (LAB_STATE.idx >= LAB_STATE.steps.length - 1) {
-      stopPlay();
-      return;
-    }
-    gotoStep(LAB_STATE.idx + 1);
-  }, LAB_STATE.speed);
-}
-function stopPlay() {
-  LAB_STATE.playing = false;
-  clearInterval(LAB_STATE.timer);
-  const btn = document.getElementById("btn-play");
-  if (btn) btn.textContent = "▶";
-}
-
-function renderStep() {
-  const step = LAB_STATE.steps[LAB_STATE.idx];
-  if (!step) return;
-  document.getElementById("step-counter").textContent = `${LAB_STATE.idx + 1} / ${LAB_STATE.steps.length}`;
-
-  const category = LAB_STATE.vis.category;
-  if (category === "bars") renderArrayCanvas(step);
-  else if (category === "graph") renderGraphCanvas(step);
-  else if (category === "grid") renderGridCanvas(step);
-
-  renderPseudocode(step);
-  renderVars(step);
-  document.getElementById("step-log").textContent = step.message || "";
-}
-
-function renderArrayCanvas(step) {
-  const wrap = document.getElementById("canvas-wrap");
-  wrap.innerHTML = "";
-  const arr = step.array || [];
-  const max = Math.max(...arr.map((v) => (typeof v === "number" && isFinite(v) ? Math.abs(v) : 0)), 1);
-  const h = step.highlights || {};
-  arr.forEach((val, i) => {
-    const bar = document.createElement("div");
-    let cls = "bar";
-    if (h.sorted && h.sorted.includes(i)) cls += " sorted";
-    if (h.pivot && h.pivot.includes(i)) cls += " pivot";
-    if (h.compare && h.compare.includes(i)) cls += " compare";
-    if (h.swap && h.swap.includes(i)) cls += " swap";
-    bar.className = cls;
-    bar.style.height = `${20 + (Math.abs(val) / max) * 200}px`;
-    bar.textContent = val;
-    wrap.appendChild(bar);
-  });
-}
-
-function edgeKey(a, b) {
-  return [a, b].sort().join("-");
-}
-
-function renderGraphCanvas(step) {
-  const wrap = document.getElementById("canvas-wrap");
-  wrap.innerHTML = `<div class="node-graph" id="node-graph"></div>`;
-  const graph = step.graph;
-  const container = document.getElementById("node-graph");
-  const w = 460, hgt = 320, cx = w / 2, cy = hgt / 2, r = 120;
-  const positions = {};
-  graph.nodes.forEach((n, i) => {
-    const angle = (2 * Math.PI * i) / graph.nodes.length - Math.PI / 2;
-    positions[n] = { x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) };
-  });
-
-  const mstSet = new Set((step.mstEdges || []).map(([a, b]) => edgeKey(a, b)));
-
-  let defs = "";
-  if (graph.directed) {
-    defs = `<defs>
-      <marker id="arrow" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-base" /></marker>
-      <marker id="arrow-active" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-active" /></marker>
-      <marker id="arrow-mst" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-mst" /></marker>
-    </defs>`;
-  }
-
-  let svg = `<svg viewBox="0 0 ${w} ${hgt}" xmlns="http://www.w3.org/2000/svg">${defs}`;
-
-  graph.edges.forEach((edge) => {
-    const [a, b, weight] = edge;
-    const pa = positions[a], pb = positions[b];
-    if (!pa || !pb) return;
-    const isActive = step.activeEdge && ((step.activeEdge[0] === a && step.activeEdge[1] === b) || (!graph.directed && step.activeEdge[0] === b && step.activeEdge[1] === a));
-    const isMst = mstSet.has(edgeKey(a, b));
-    let cls = "gedge";
-    if (isMst) cls += " mst";
-    else if (isActive) cls += " active";
-    const marker = graph.directed ? (isMst ? "url(#arrow-mst)" : isActive ? "url(#arrow-active)" : "url(#arrow)") : "";
-    svg += `<line class="${cls}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" ${marker ? `marker-end="${marker}"` : ""} />`;
-    if (weight !== undefined) {
-      const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
-      svg += `<rect x="${mx - 13}" y="${my - 9}" width="26" height="16" class="edge-label-bg" />`;
-      svg += `<text class="glabel" style="font-size:10px;" x="${mx}" y="${my + 4}">${weight}</text>`;
-    }
-  });
-
-  graph.nodes.forEach((n) => {
-    const p = positions[n];
-    let cls = "gnode";
-    if (step.visited && step.visited.includes(n)) cls += " visited";
-    if (step.current === n) cls += " current";
-    svg += `<circle class="${cls}" cx="${p.x}" cy="${p.y}" r="20" />`;
-    svg += `<text class="glabel" x="${p.x}" y="${p.y + 5}">${n}</text>`;
-    if (step.nodeLabels && step.nodeLabels[n] !== undefined) {
-      const dv = step.nodeLabels[n];
-      svg += `<text class="glabel dist-label" x="${p.x}" y="${p.y + 35}">${dv === Infinity ? "∞" : dv}</text>`;
-    }
-  });
-
-  svg += `</svg>`;
-  container.innerHTML = svg;
-}
-
-function renderGridCanvas(step) {
-  const wrap = document.getElementById("canvas-wrap");
-  const grid = step.grid || step.matrix || [];
-  const rowLabels = step.rowLabels || step.labels || [];
-  const colLabels = step.colLabels || step.labels || [];
-  const h = step.highlight || {};
-  const isWrite = (r, c) => h.write && h.write[0] === r && h.write[1] === c;
-  const isRead = (r, c) => h.read && h.read.some(([rr, cc]) => rr === r && cc === c);
-
-  let html = `<table class="grid-table"><thead><tr><th></th>${colLabels.map((c) => `<th>${escapeHtml(String(c))}</th>`).join("")}</tr></thead><tbody>`;
-  grid.forEach((row, r) => {
-    html += `<tr><th>${escapeHtml(String(rowLabels[r] !== undefined ? rowLabels[r] : r))}</th>`;
-    row.forEach((val, c) => {
-      let cls = "grid-cell";
-      if (isWrite(r, c)) cls += " write";
-      else if (isRead(r, c)) cls += " read";
-      html += `<td class="${cls}">${val === Infinity ? "∞" : val}</td>`;
-    });
-    html += `</tr>`;
-  });
-  html += `</tbody></table>`;
-  wrap.innerHTML = `<div class="grid-scroll">${html}</div>`;
-}
-
-function renderPseudocode(step) {
-  const el = document.getElementById("pseudo");
-  const tab = LAB_STATE.codeTab || "pseudo";
-
-  if (tab === "pseudo") {
-    const lines = PSEUDOCODE[LAB_STATE.vis.id] || [];
-    el.innerHTML = lines
-      .map((l, i) => `<div class="pl${i === step.line ? " active" : ""}">${escapeHtml(l)}</div>`)
-      .join("");
-    return;
-  }
-
-  const snippets = CODE_SNIPPETS[LAB_STATE.vis.id];
-  const code = snippets && snippets[tab] ? snippets[tab] : "// Not available for this algorithm yet.";
-  el.innerHTML = `<pre>${escapeHtml(code)}</pre>`;
-}
-
-function renderVars(step) {
-  const tbody = document.querySelector("#vars-table tbody");
-  const vars = step.vars || {};
-  const keys = Object.keys(vars);
-  tbody.innerHTML = keys.length
-    ? keys.map((k) => `<tr><td>${k}</td><td>${vars[k]}</td></tr>`).join("")
-    : `<tr><td colspan="2" style="color:var(--ink-2);">—</td></tr>`;
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-/* ---------------- INIT ---------------- */
-router();

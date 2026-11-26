@@ -346,3 +346,12 @@ body{font-size:16px;}
 .lab-grid>*{min-width:0;}
 .pseudo{overflow-x:auto;overflow-y:auto;max-width:100%;}
 .page-root{min-width:0;}
+
+/* ---------- MOBILE MENU: backdrop + close button ---------- */
+.sidebar-backdrop,.sidebar-close{display:none;}
+@media (max-width:800px){
+  .sidebar-backdrop.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:15;}
+  .sidebar-close{display:block;position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;background:var(--obsidian-2);border:1px solid var(--line-bright);color:var(--ink-0);font-size:16px;cursor:pointer;}
+  .sidebar-close:hover{border-color:var(--ember);color:var(--ember);}
+  .brand{padding-right:56px;}
+}
