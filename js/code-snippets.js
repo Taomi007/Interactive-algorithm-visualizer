@@ -14,7 +14,8 @@ const CODE_SNIPPETS = {
     }
     return -1;
 }`,
-    cpp: `int linearSearch(std::vector<int>& arr, int target) {
+    cpp: `using namespace std;
+int linearSearch(vector<int>& arr, int target) {
     for (int i = 0; i < (int)arr.size(); i++) {
         if (arr[i] == target) {
             return i;
@@ -40,7 +41,8 @@ const CODE_SNIPPETS = {
     }
     return -1;
 }`,
-    cpp: `int binarySearch(std::vector<int>& arr, int target) {
+    cpp: `using namespace std;
+int binarySearch(vector<int>& arr, int target) {
     int lo = 0, hi = (int)arr.size() - 1;
     while (lo <= hi) {
         int mid = lo + (hi - lo) / 2;
@@ -78,13 +80,14 @@ const CODE_SNIPPETS = {
         if (!swapped) break;
     }
 }`,
-    cpp: `void bubbleSort(std::vector<int>& arr) {
+    cpp: `using namespace std;
+void bubbleSort(vector<int>& arr) {
     int n = arr.size();
     for (int i = 0; i < n - 1; i++) {
         bool swapped = false;
         for (int j = 0; j < n - i - 1; j++) {
             if (arr[j] > arr[j + 1]) {
-                std::swap(arr[j], arr[j + 1]);
+                swap(arr[j], arr[j + 1]);
                 swapped = true;
             }
         }
@@ -116,7 +119,8 @@ const CODE_SNIPPETS = {
         arr[j + 1] = key;
     }
 }`,
-    cpp: `void insertionSort(std::vector<int>& arr) {
+    cpp: `using namespace std;
+void insertionSort(vector<int>& arr) {
     for (int i = 1; i < (int)arr.size(); i++) {
         int key = arr[i];
         int j = i - 1;
@@ -150,14 +154,15 @@ const CODE_SNIPPETS = {
         arr[minIdx] = tmp;
     }
 }`,
-    cpp: `void selectionSort(std::vector<int>& arr) {
+    cpp: `using namespace std;
+void selectionSort(vector<int>& arr) {
     int n = arr.size();
     for (int i = 0; i < n - 1; i++) {
         int minIdx = i;
         for (int j = i + 1; j < n; j++) {
             if (arr[j] < arr[minIdx]) minIdx = j;
         }
-        std::swap(arr[i], arr[minIdx]);
+        swap(arr[i], arr[minIdx]);
     }
 }`,
     python: `def selection_sort(arr):
@@ -192,9 +197,10 @@ void mergeSort(int arr[], int lo, int hi) {
     mergeSort(arr, mid + 1, hi);
     merge(arr, lo, mid, hi);
 }`,
-    cpp: `void merge(std::vector<int>& arr, int lo, int mid, int hi) {
-    std::vector<int> left(arr.begin() + lo, arr.begin() + mid + 1);
-    std::vector<int> right(arr.begin() + mid + 1, arr.begin() + hi + 1);
+    cpp: `using namespace std;
+void merge(vector<int>& arr, int lo, int mid, int hi) {
+    vector<int> left(arr.begin() + lo, arr.begin() + mid + 1);
+    vector<int> right(arr.begin() + mid + 1, arr.begin() + hi + 1);
     int i = 0, j = 0, k = lo;
     while (i < (int)left.size() && j < (int)right.size())
         arr[k++] = (left[i] <= right[j]) ? left[i++] : right[j++];
@@ -202,7 +208,7 @@ void mergeSort(int arr[], int lo, int hi) {
     while (j < (int)right.size()) arr[k++] = right[j++];
 }
 
-void mergeSort(std::vector<int>& arr, int lo, int hi) {
+void mergeSort(vector<int>& arr, int lo, int hi) {
     if (lo >= hi) return;
     int mid = lo + (hi - lo) / 2;
     mergeSort(arr, lo, mid);
@@ -255,13 +261,14 @@ void bfs(int start, int** adj, int* adjSize, int n) {
         }
     }
 }`,
-    cpp: `void bfs(int start, std::vector<std::vector<int>>& adj) {
-    std::vector<bool> visited(adj.size(), false);
-    std::queue<int> q;
+    cpp: `using namespace std;
+void bfs(int start, vector<vector<int>>& adj) {
+    vector<bool> visited(adj.size(), false);
+    queue<int> q;
     q.push(start); visited[start] = true;
     while (!q.empty()) {
         int u = q.front(); q.pop();
-        std::cout << "visit " << u << "\\n";
+        cout << "visit " << u << "\\n";
         for (int v : adj[u]) {
             if (!visited[v]) {
                 visited[v] = true;
@@ -302,15 +309,16 @@ def bfs(graph, start):
         }
     }
 }`,
-    cpp: `void dfs(int start, std::vector<std::vector<int>>& adj) {
-    std::vector<bool> visited(adj.size(), false);
-    std::stack<int> s;
+    cpp: `using namespace std;
+void dfs(int start, vector<vector<int>>& adj) {
+    vector<bool> visited(adj.size(), false);
+    stack<int> s;
     s.push(start);
     while (!s.empty()) {
         int u = s.top(); s.pop();
         if (visited[u]) continue;
         visited[u] = true;
-        std::cout << "visit " << u << "\\n";
+        cout << "visit " << u << "\\n";
         for (auto it = adj[u].rbegin(); it != adj[u].rend(); ++it) {
             if (!visited[*it]) s.push(*it);
         }
@@ -350,15 +358,16 @@ void quickSort(int arr[], int lo, int hi) {
     quickSort(arr, lo, p - 1);
     quickSort(arr, p + 1, hi);
 }`,
-    cpp: `int partition(std::vector<int>& arr, int lo, int hi) {
+    cpp: `using namespace std;
+int partition(vector<int>& arr, int lo, int hi) {
     int pivot = arr[hi], i = lo - 1;
     for (int j = lo; j < hi; j++) {
-        if (arr[j] < pivot) std::swap(arr[++i], arr[j]);
+        if (arr[j] < pivot) swap(arr[++i], arr[j]);
     }
-    std::swap(arr[i + 1], arr[hi]);
+    swap(arr[i + 1], arr[hi]);
     return i + 1;
 }
-void quickSort(std::vector<int>& arr, int lo, int hi) {
+void quickSort(vector<int>& arr, int lo, int hi) {
     if (lo >= hi) return;
     int p = partition(arr, lo, hi);
     quickSort(arr, lo, p - 1);
@@ -401,20 +410,21 @@ void heapSort(int arr[], int n) {
         siftDown(arr, 0, end);
     }
 }`,
-    cpp: `void siftDown(std::vector<int>& arr, int i, int size) {
+    cpp: `using namespace std;
+void siftDown(vector<int>& arr, int i, int size) {
     int largest = i, l = 2*i+1, r = 2*i+2;
     if (l < size && arr[l] > arr[largest]) largest = l;
     if (r < size && arr[r] > arr[largest]) largest = r;
     if (largest != i) {
-        std::swap(arr[i], arr[largest]);
+        swap(arr[i], arr[largest]);
         siftDown(arr, largest, size);
     }
 }
-void heapSort(std::vector<int>& arr) {
+void heapSort(vector<int>& arr) {
     int n = arr.size();
     for (int i = n/2 - 1; i >= 0; i--) siftDown(arr, i, n);
     for (int end = n-1; end >= 1; end--) {
-        std::swap(arr[0], arr[end]);
+        swap(arr[0], arr[end]);
         siftDown(arr, 0, end);
     }
 }`,
@@ -452,9 +462,10 @@ def heap_sort(arr):
     memcpy(arr, output, n * sizeof(int));
     free(count); free(output);
 }`,
-    cpp: `void countingSort(std::vector<int>& arr) {
-    int maxVal = *std::max_element(arr.begin(), arr.end());
-    std::vector<int> count(maxVal + 1, 0), output(arr.size());
+    cpp: `using namespace std;
+void countingSort(vector<int>& arr) {
+    int maxVal = *max_element(arr.begin(), arr.end());
+    vector<int> count(maxVal + 1, 0), output(arr.size());
     for (int x : arr) count[x]++;
     for (int i = 1; i <= maxVal; i++) count[i] += count[i-1];
     for (int i = arr.size() - 1; i >= 0; i--) {
@@ -495,9 +506,10 @@ void radixSort(int arr[], int n) {
     for (int exp = 1; maxVal/exp > 0; exp *= 10)
         countingSortByDigit(arr, n, exp);
 }`,
-    cpp: `void countingSortByDigit(std::vector<int>& arr, int exp) {
+    cpp: `using namespace std;
+void countingSortByDigit(vector<int>& arr, int exp) {
     int n = arr.size();
-    std::vector<int> output(n), count(10, 0);
+    vector<int> output(n), count(10, 0);
     for (int x : arr) count[(x/exp) % 10]++;
     for (int i = 1; i < 10; i++) count[i] += count[i-1];
     for (int i = n - 1; i >= 0; i--) {
@@ -507,8 +519,8 @@ void radixSort(int arr[], int n) {
     }
     arr = output;
 }
-void radixSort(std::vector<int>& arr) {
-    int maxVal = *std::max_element(arr.begin(), arr.end());
+void radixSort(vector<int>& arr) {
+    int maxVal = *max_element(arr.begin(), arr.end());
     for (int exp = 1; maxVal/exp > 0; exp *= 10)
         countingSortByDigit(arr, exp);
 }`,
@@ -552,11 +564,12 @@ void dijkstra(int graph[][MAXN], int n, int src, int dist[]) {
                 dist[v] = dist[u] + graph[u][v];
     }
 }`,
-    cpp: `std::vector<int> dijkstra(std::vector<std::vector<std::pair<int,int>>>& adj, int src) {
+    cpp: `using namespace std;
+vector<int> dijkstra(vector<vector<pair<int,int>>>& adj, int src) {
     int n = adj.size();
-    std::vector<int> dist(n, INT_MAX);
+    vector<int> dist(n, INT_MAX);
     dist[src] = 0;
-    std::priority_queue<std::pair<int,int>, std::vector<std::pair<int,int>>, std::greater<>> pq;
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
     pq.push({0, src});
     while (!pq.empty()) {
         auto [d, u] = pq.top(); pq.pop();
@@ -601,7 +614,8 @@ int bellmanFord(int src[], int dst[], int weight[], int m, int n, int source, in
             return -1; // negative cycle
     return 0;
 }`,
-    cpp: `bool bellmanFord(std::vector<std::array<int,3>>& edges, int n, int source, std::vector<int>& dist) {
+    cpp: `using namespace std;
+bool bellmanFord(vector<array<int,3>>& edges, int n, int source, vector<int>& dist) {
     dist.assign(n, INT_MAX);
     dist[source] = 0;
     for (int i = 1; i < n; i++)
@@ -634,7 +648,8 @@ int bellmanFord(int src[], int dst[], int weight[], int m, int n, int source, in
                 if (dist[i][k] + dist[k][j] < dist[i][j])
                     dist[i][j] = dist[i][k] + dist[k][j];
 }`,
-    cpp: `void floydWarshall(std::vector<std::vector<int>>& dist) {
+    cpp: `using namespace std;
+void floydWarshall(vector<vector<int>>& dist) {
     int n = dist.size();
     for (int k = 0; k < n; k++)
         for (int i = 0; i < n; i++)
@@ -669,11 +684,12 @@ void prim(int graph[][MAXN], int n) {
             }
     }
 }`,
-    cpp: `void prim(std::vector<std::vector<std::pair<int,int>>>& adj, int start) {
+    cpp: `using namespace std;
+void prim(vector<vector<pair<int,int>>>& adj, int start) {
     int n = adj.size();
-    std::vector<int> key(n, INT_MAX);
-    std::vector<bool> inMst(n, false);
-    std::priority_queue<std::pair<int,int>, std::vector<std::pair<int,int>>, std::greater<>> pq;
+    vector<int> key(n, INT_MAX);
+    vector<bool> inMst(n, false);
+    priority_queue<pair<int,int>, vector<pair<int,int>>, greater<>> pq;
     key[start] = 0;
     pq.push({0, start});
     while (!pq.empty()) {
@@ -724,9 +740,10 @@ void kruskal(int src[], int dst[], int weight[], int m, int n) {
         }
     }
 }`,
-    cpp: `struct DSU {
-    std::vector<int> parent;
-    DSU(int n) : parent(n) { std::iota(parent.begin(), parent.end(), 0); }
+    cpp: `using namespace std;
+struct DSU {
+    vector<int> parent;
+    DSU(int n) : parent(n) { iota(parent.begin(), parent.end(), 0); }
     int find(int x) { return parent[x]==x ? x : parent[x]=find(parent[x]); }
     bool unite(int a, int b) {
         int ra = find(a), rb = find(b);
@@ -735,8 +752,8 @@ void kruskal(int src[], int dst[], int weight[], int m, int n) {
         return true;
     }
 };
-int kruskal(std::vector<std::array<int,3>>& edges, int n) {
-    std::sort(edges.begin(), edges.end(), [](auto& a, auto& b){ return a[2] < b[2]; });
+int kruskal(vector<array<int,3>>& edges, int n) {
+    sort(edges.begin(), edges.end(), [](auto& a, auto& b){ return a[2] < b[2]; });
     DSU dsu(n);
     int totalWeight = 0;
     for (auto& [u, v, w] : edges)
@@ -771,18 +788,19 @@ void topoSort(int n, int** adj, int* adjSize, int order[]) {
     for (int u = 0; u < n; u++) if (!visited[u]) dfs(u, adj, adjSize, visited, order, &idx);
     for (int i = 0; i < n/2; i++) { int t=order[i]; order[i]=order[n-1-i]; order[n-1-i]=t; }
 }`,
-    cpp: `void dfs(int u, std::vector<std::vector<int>>& adj, std::vector<bool>& visited, std::stack<int>& order) {
+    cpp: `using namespace std;
+void dfs(int u, vector<vector<int>>& adj, vector<bool>& visited, stack<int>& order) {
     visited[u] = true;
     for (int v : adj[u])
         if (!visited[v]) dfs(v, adj, visited, order);
     order.push(u);
 }
-std::vector<int> topoSort(std::vector<std::vector<int>>& adj) {
+vector<int> topoSort(vector<vector<int>>& adj) {
     int n = adj.size();
-    std::vector<bool> visited(n, false);
-    std::stack<int> order;
+    vector<bool> visited(n, false);
+    stack<int> order;
     for (int u = 0; u < n; u++) if (!visited[u]) dfs(u, adj, visited, order);
-    std::vector<int> result;
+    vector<int> result;
     while (!order.empty()) { result.push_back(order.top()); order.pop(); }
     return result;
 }`,
@@ -832,13 +850,14 @@ int fordFulkerson(int capacity[][MAXN], int n, int s, int t) {
     }
     return maxFlow;
 }`,
-    cpp: `int fordFulkerson(std::vector<std::vector<int>> capacity, int s, int t) {
+    cpp: `using namespace std;
+int fordFulkerson(vector<vector<int>> capacity, int s, int t) {
     int n = capacity.size(), maxFlow = 0;
-    std::vector<int> parent(n);
+    vector<int> parent(n);
     auto bfsPath = [&]() {
-        std::fill(parent.begin(), parent.end(), -2);
+        fill(parent.begin(), parent.end(), -2);
         parent[s] = -1;
-        std::queue<int> q; q.push(s);
+        queue<int> q; q.push(s);
         while (!q.empty()) {
             int u = q.front(); q.pop();
             for (int v = 0; v < n; v++)
@@ -853,7 +872,7 @@ int fordFulkerson(int capacity[][MAXN], int n, int s, int t) {
     while (bfsPath()) {
         int pathFlow = INT_MAX;
         for (int v = t; v != s; v = parent[v])
-            pathFlow = std::min(pathFlow, capacity[parent[v]][v]);
+            pathFlow = min(pathFlow, capacity[parent[v]][v]);
         for (int v = t; v != s; v = parent[v]) {
             capacity[parent[v]][v] -= pathFlow;
             capacity[v][parent[v]] += pathFlow;
@@ -906,9 +925,10 @@ def ford_fulkerson(capacity, source, sink):
     for (int i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];
     return dp[n];
 }`,
-    cpp: `int fibonacci(int n) {
+    cpp: `using namespace std;
+int fibonacci(int n) {
     if (n <= 1) return n;
-    std::vector<int> dp(n + 1);
+    vector<int> dp(n + 1);
     dp[0] = 0; dp[1] = 1;
     for (int i = 2; i <= n; i++) dp[i] = dp[i-1] + dp[i-2];
     return dp[n];
@@ -935,13 +955,14 @@ def ford_fulkerson(capacity, source, sink):
     }
     return dp[n];
 }`,
-    cpp: `int rodCutting(std::vector<int>& price) {
+    cpp: `using namespace std;
+int rodCutting(vector<int>& price) {
     int n = price.size();
-    std::vector<int> dp(n + 1, 0);
+    vector<int> dp(n + 1, 0);
     for (int len = 1; len <= n; len++) {
         int best = INT_MIN;
         for (int cut = 1; cut <= len; cut++)
-            best = std::max(best, price[cut-1] + dp[len-cut]);
+            best = max(best, price[cut-1] + dp[len-cut]);
         dp[len] = best;
     }
     return dp[n];
@@ -966,13 +987,14 @@ def ford_fulkerson(capacity, source, sink):
     }
     return dp[amount] == INT_MAX ? -1 : dp[amount];
 }`,
-    cpp: `int coinChange(std::vector<int>& coins, int amount) {
-    std::vector<int> dp(amount + 1, INT_MAX);
+    cpp: `using namespace std;
+int coinChange(vector<int>& coins, int amount) {
+    vector<int> dp(amount + 1, INT_MAX);
     dp[0] = 0;
     for (int a = 1; a <= amount; a++)
         for (int c : coins)
             if (c <= a && dp[a - c] != INT_MAX)
-                dp[a] = std::min(dp[a], dp[a - c] + 1);
+                dp[a] = min(dp[a], dp[a - c] + 1);
     return dp[amount] == INT_MAX ? -1 : dp[amount];
 }`,
     python: `def coin_change(coins, amount):
@@ -997,14 +1019,15 @@ def ford_fulkerson(capacity, source, sink):
         }
     return dp[n][capacity];
 }`,
-    cpp: `int knapsack01(std::vector<int>& weight, std::vector<int>& value, int capacity) {
+    cpp: `using namespace std;
+int knapsack01(vector<int>& weight, vector<int>& value, int capacity) {
     int n = weight.size();
-    std::vector<std::vector<int>> dp(n+1, std::vector<int>(capacity+1, 0));
+    vector<vector<int>> dp(n+1, vector<int>(capacity+1, 0));
     for (int i = 1; i <= n; i++)
         for (int w = 0; w <= capacity; w++) {
             dp[i][w] = dp[i-1][w];
             if (weight[i-1] <= w)
-                dp[i][w] = std::max(dp[i][w], value[i-1] + dp[i-1][w-weight[i-1]]);
+                dp[i][w] = max(dp[i][w], value[i-1] + dp[i-1][w-weight[i-1]]);
         }
     return dp[n][capacity];
 }`,
@@ -1030,13 +1053,14 @@ def ford_fulkerson(capacity, source, sink):
         }
     return dp[m][n];
 }`,
-    cpp: `int lcs(const std::string& s1, const std::string& s2) {
+    cpp: `using namespace std;
+int lcs(const string& s1, const string& s2) {
     int m = s1.size(), n = s2.size();
-    std::vector<std::vector<int>> dp(m+1, std::vector<int>(n+1, 0));
+    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
     for (int i = 1; i <= m; i++)
         for (int j = 1; j <= n; j++) {
             if (s1[i-1] == s2[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
-            else dp[i][j] = std::max(dp[i-1][j], dp[i][j-1]);
+            else dp[i][j] = max(dp[i-1][j], dp[i][j-1]);
         }
     return dp[m][n];
 }`,
@@ -1066,12 +1090,13 @@ int activitySelection(int start[], int finish[], int n, int selected[]) {
     }
     return count;
 }`,
-    cpp: `std::vector<int> activitySelection(std::vector<int>& start, std::vector<int>& finish) {
+    cpp: `using namespace std;
+vector<int> activitySelection(vector<int>& start, vector<int>& finish) {
     int n = start.size();
-    std::vector<int> idx(n);
-    std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(), [&](int a, int b){ return finish[a] < finish[b]; });
-    std::vector<int> selected = { idx[0] };
+    vector<int> idx(n);
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b){ return finish[a] < finish[b]; });
+    vector<int> selected = { idx[0] };
     int lastFinish = finish[idx[0]];
     for (int i = 1; i < n; i++) {
         if (start[idx[i]] >= lastFinish) {
@@ -1112,11 +1137,12 @@ double fractionalKnapsack(Item items[], int n, double capacity) {
     }
     return totalValue;
 }`,
-    cpp: `double fractionalKnapsack(std::vector<double> weight, std::vector<double> value, double capacity) {
+    cpp: `using namespace std;
+double fractionalKnapsack(vector<double> weight, vector<double> value, double capacity) {
     int n = weight.size();
-    std::vector<int> idx(n);
-    std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(), [&](int a, int b){
+    vector<int> idx(n);
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b){
         return value[a]/weight[a] > value[b]/weight[b];
     });
     double totalValue = 0;
@@ -1169,14 +1195,15 @@ Node* buildHuffman(Node* nodes[], int n) {
     }
     return nodes[0];
 }`,
-    cpp: `struct Node {
-    std::string label; int freq;
+    cpp: `using namespace std;
+struct Node {
+    string label; int freq;
     Node *left = nullptr, *right = nullptr;
 };
 struct Cmp { bool operator()(Node* a, Node* b) { return a->freq > b->freq; } };
 
-Node* buildHuffman(std::vector<Node*> leaves) {
-    std::priority_queue<Node*, std::vector<Node*>, Cmp> pq(leaves.begin(), leaves.end());
+Node* buildHuffman(vector<Node*> leaves) {
+    priority_queue<Node*, vector<Node*>, Cmp> pq(leaves.begin(), leaves.end());
     while (pq.size() > 1) {
         Node* a = pq.top(); pq.pop();
         Node* b = pq.top(); pq.pop();

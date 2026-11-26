@@ -295,6 +295,28 @@ const VISUALIZERS = {
 const root = document.getElementById("page-root");
 const crumbs = document.getElementById("crumbs");
 
+/* Clickable breadcrumb: items = [{label, href?}], last item is the current page */
+function setCrumbs(items) {
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  crumbs.innerHTML = items
+    .map((it, i) =>
+      it.href && i < items.length - 1
+        ? `<a href="${it.href}">${esc(it.label)}</a>`
+        : `<span class="crumb-cur">${esc(it.label)}</span>`)
+    .join('<span class="sep">/</span>');
+}
+
+/* Dark / light theme toggle (remembered in localStorage) */
+const themeBtn = document.getElementById("theme-toggle");
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  try { localStorage.setItem("kle-theme", t); } catch (e) {}
+  themeBtn.textContent = t === "light" ? "☾ Dark mode" : "☀ Light mode";
+}
+applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+themeBtn.addEventListener("click", () =>
+  applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light"));
+
 function router() {
   const hash = location.hash.replace(/^#\/?/, "");
   const parts = hash.split("/").filter(Boolean);
@@ -371,7 +393,7 @@ typeTerminal();
 
 /* ---------------- HOME ---------------- */
 function renderHome() {
-  crumbs.textContent = "HOME";
+  setCrumbs([{ label: "HOME" }]);
   renderSidebar(null);
   root.innerHTML = `
     <section class="hero">
@@ -411,7 +433,7 @@ function renderHome() {
 function renderModule(id) {
   const mod = SYLLABUS.find((m) => m.id === id);
   if (!mod) return renderHome();
-  crumbs.textContent = `HOME / ${mod.title.toUpperCase()}`;
+  setCrumbs([{ label: "HOME", href: "#/" }, { label: mod.title.toUpperCase() }]);
   renderSidebar(null);
   root.innerHTML = `
     <div class="content-header">
@@ -447,7 +469,7 @@ function renderTopic(id) {
   });
   if (!topic) return renderHome();
   const content = CONTENT[id];
-  crumbs.textContent = `HOME / ${mod.title.toUpperCase()} / ${topic.name.toUpperCase()}`;
+  setCrumbs([{ label: "HOME", href: "#/" }, { label: mod.title.toUpperCase(), href: `#/module/${mod.id}` }, { label: topic.name.toUpperCase() }]);
   renderSidebar(id);
 
   const idxInMod = mod.topics.findIndex((t) => t.id === id);
@@ -505,7 +527,7 @@ function renderLab(visId) {
   // find matching topic for breadcrumb/sidebar highlight
   let topicId = null;
   SYLLABUS.forEach((m) => m.topics.forEach((t) => { if (t.visualizer === visId) topicId = t.id; }));
-  crumbs.textContent = `HOME / LOGIC LAB / ${vis.label.toUpperCase()}`;
+  setCrumbs([{ label: "HOME", href: "#/" }, { label: "LOGIC LAB", href: "#/lab/bubble-sort" }, { label: vis.label.toUpperCase() }]);
   renderSidebar(topicId);
 
   root.innerHTML = `
@@ -750,9 +772,9 @@ function renderGraphCanvas(step) {
   let defs = "";
   if (graph.directed) {
     defs = `<defs>
-      <marker id="arrow" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#44444d" /></marker>
-      <marker id="arrow-active" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ff5a1f" /></marker>
-      <marker id="arrow-mst" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4fe38b" /></marker>
+      <marker id="arrow" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-base" /></marker>
+      <marker id="arrow-active" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-active" /></marker>
+      <marker id="arrow-mst" viewBox="0 0 10 10" refX="19" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="arrow-mst" /></marker>
     </defs>`;
   }
 
@@ -771,7 +793,7 @@ function renderGraphCanvas(step) {
     svg += `<line class="${cls}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" ${marker ? `marker-end="${marker}"` : ""} />`;
     if (weight !== undefined) {
       const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
-      svg += `<rect x="${mx - 13}" y="${my - 9}" width="26" height="16" fill="#0a0a0c" stroke="#2c2c33" />`;
+      svg += `<rect x="${mx - 13}" y="${my - 9}" width="26" height="16" class="edge-label-bg" />`;
       svg += `<text class="glabel" style="font-size:10px;" x="${mx}" y="${my + 4}">${weight}</text>`;
     }
   });
